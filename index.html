@@ -237,6 +237,78 @@
             line-height: 1.6;
         }
         
+        .day-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .day-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .day-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .day-btn.active {
+            background: white;
+            color: #667eea;
+            transform: scale(1.05);
+        }
+        
+        .tab-menu {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .chart-container {
+            display: none;
+        }
+        
+        .chart-container.active {
+            display: block;
+        }
+        
         .legend {
             display: flex;
             justify-content: center;
@@ -329,25 +401,80 @@
             <button class="search-btn" id="fetchDataBtn">🔍 Get Fishing Conditions</button>
         </div>
         
+        <div class="day-selector" id="daySelector"></div>
+        
         <div class="main-content">
             <div class="chart-section">
                 <h2 class="viz-title" id="locationTitle">Loading...</h2>
                 <p class="viz-subtitle" id="dateSubtitle">Select a location to view fishing conditions</p>
                 
-                <div class="canvas-container">
-                    <canvas id="mainCanvas" width="600" height="600" aria-label="24-hour circular fishing forecast chart showing optimal fishing times throughout the day"></canvas>
+                <div class="tab-menu" id="chartTabMenu">
+                    <button class="tab-btn active" data-chart="circular">24-Hour Circular</button>
+                    <button class="tab-btn" data-chart="rating">Hourly Rating</button>
+                    <button class="tab-btn" data-chart="weekly">Weekly Overview</button>
                 </div>
                 
-                <div class="legend" id="legend"></div>
+                <div class="chart-container active" id="circularChartContainer">
+                    <div class="canvas-container">
+                        <canvas id="mainCanvas" width="600" height="600" aria-label="24-hour circular fishing forecast chart showing optimal fishing times throughout the day"></canvas>
+                    </div>
+                    
+                    <div class="legend" id="legend"></div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">How to Read This Chart</div>
+                        <div class="info-text">
+                            This 24-hour circular chart shows the best fishing times throughout the day. 
+                            The chart is oriented with 12:00 noon at the top and 12:00 midnight at the bottom.
+                            6:00 AM is on the left, and 6:00 PM is on the right.
+                            Brighter/fuller areas indicate better fishing conditions based on your selected criteria.
+                            Each dataset (tide, wind, temperature, etc.) can be enabled/disabled and customized using the controls panel.
+                        </div>
+                    </div>
+                </div>
                 
-                <div class="info-box">
-                    <div class="info-title">How to Read This Chart</div>
-                    <div class="info-text">
-                        This 24-hour circular chart shows the best fishing times throughout the day. 
-                        The chart is oriented with 12:00 noon at the top and 12:00 midnight at the bottom.
-                        6:00 AM is on the left, and 6:00 PM is on the right.
-                        Brighter/fuller areas indicate better fishing conditions based on your selected criteria.
-                        Each dataset (tide, wind, temperature, etc.) can be enabled/disabled and customized using the controls panel.
+                <div class="chart-container" id="ratingChartContainer">
+                    <div class="canvas-container">
+                        <canvas id="ratingCanvas" width="600" height="400" aria-label="Hourly fishing rating bar chart"></canvas>
+                    </div>
+                    
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            <span><strong>Overall Fishing Rating</strong> (0-100%)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">How to Read This Chart</div>
+                        <div class="info-text">
+                            This chart shows the overall fishing rating for each hour of the day.
+                            Higher bars indicate better fishing conditions. The rating combines all enabled datasets
+                            into a single score, with values closer to the ideal ranges producing higher scores.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container" id="weeklyChartContainer">
+                    <div class="canvas-container">
+                        <canvas id="weeklyCanvas" width="700" height="400" aria-label="Weekly fishing overview chart"></canvas>
+                    </div>
+                    
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            <span><strong>Daily Average Rating</strong> (0-100%)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">How to Read This Chart</div>
+                        <div class="info-text">
+                            This chart displays the average fishing rating for each day of the week.
+                            Each bar represents the average of all hourly ratings for that day.
+                            Higher values indicate better overall fishing conditions for that day.
+                            Click on any day button above to view detailed hourly charts.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -362,14 +489,21 @@
     <script type="module">
         import * as TideHarmonic from './tide-harmonic.js';
         
+        // Configuration constants
+        const FORECAST_DAYS = 7;  // Number of days to fetch from API
+        const HOUR_LABEL_INTERVAL = 3;  // Show hour labels every N hours
+        
         // Color gradient constants for chart visualization
         const CHART_COLORS = {
-            HUE_BASE: 200,        // Blue hue for low scores
-            HUE_RANGE: 80,        // Range to green for high scores
-            SATURATION_BASE: 70,  // Base saturation percentage
-            SATURATION_RANGE: 30, // Additional saturation for high scores
-            LIGHTNESS_BASE: 40,   // Base lightness percentage
-            LIGHTNESS_RANGE: 20   // Additional lightness for high scores
+            // RGB gradient from low to high score (purple-blue to violet)
+            RGB_LOW_R: 102,    // Red component for low scores
+            RGB_HIGH_R: 118,   // Red component for high scores
+            RGB_LOW_G: 126,    // Green component for low scores
+            RGB_HIGH_G: 75,    // Green component for high scores
+            RGB_LOW_B: 234,    // Blue component for low scores
+            RGB_HIGH_B: 162,   // Blue component for high scores
+            ALPHA_MIN: 0.7,    // Minimum alpha transparency
+            ALPHA_RANGE: 0.3   // Additional alpha for high scores
         };
         
         // Global state
@@ -378,6 +512,8 @@
         let tideStation = null;
         let currentLocation = { name: 'Fremantle', lat: -32.055, lon: 115.745 };
         let currentTimezone = 'Australia/Perth';
+        let currentDay = 0;  // Currently selected day (0-6)
+        let allDaysData = [];  // Store parsed data for all 7 days
         
         // Dataset configurations
         const datasets = {
@@ -468,6 +604,29 @@
         
         function attachEventListeners() {
             document.getElementById('fetchDataBtn').addEventListener('click', fetchData);
+            
+            // Chart tab switching
+            document.getElementById('chartTabMenu').addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-btn')) {
+                    // Update active tab button
+                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    // Show corresponding chart
+                    const chartType = e.target.getAttribute('data-chart');
+                    document.querySelectorAll('.chart-container').forEach(container => container.classList.remove('active'));
+                    
+                    if (chartType === 'circular') {
+                        document.getElementById('circularChartContainer').classList.add('active');
+                    } else if (chartType === 'rating') {
+                        document.getElementById('ratingChartContainer').classList.add('active');
+                    } else if (chartType === 'weekly') {
+                        document.getElementById('weeklyChartContainer').classList.add('active');
+                    }
+                    
+                    updateChart();
+                }
+            });
         }
         
         function renderDatasetControls() {
@@ -566,19 +725,26 @@
             document.getElementById('dateSubtitle').textContent = 'Fetching data...';
             
             try {
-                // Fetch weather data
-                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,pressure_msl,precipitation_probability,rain,relative_humidity_2m,apparent_temperature&timezone=${timezone}`;
+                // Fetch weather data for configured number of days
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,pressure_msl,precipitation_probability,rain,relative_humidity_2m,apparent_temperature&timezone=${timezone}&forecast_days=${FORECAST_DAYS}`;
                 const weatherResponse = await fetch(weatherUrl);
                 weatherData = await weatherResponse.json();
                 
-                // Fetch marine data
-                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,sea_surface_temperature,wave_direction,wave_period,tertiary_swell_wave_height,tertiary_swell_wave_period,tertiary_swell_wave_direction&timezone=${timezone}`;
+                // Fetch marine data for configured number of days
+                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,sea_surface_temperature,wave_direction,wave_period,tertiary_swell_wave_height,tertiary_swell_wave_period,tertiary_swell_wave_direction&timezone=${timezone}&forecast_days=${FORECAST_DAYS}`;
                 const marineResponse = await fetch(marineUrl);
                 marineData = await marineResponse.json();
                 
                 // Find nearest tide station
                 tideStation = TideHarmonic.findNearestStation(lat, lon);
                 
+                // Parse data into daily chunks
+                parseDailyData();
+                
+                // Create day selector buttons
+                createDaySelector();
+                
+                // Update charts
                 updateChart();
                 updateLegend();
             } catch (error) {
@@ -587,11 +753,86 @@
             }
         }
         
-        function updateChart() {
-            if (!weatherData || !marineData) {
+        function parseDailyData() {
+            allDaysData = [];
+            
+            if (!weatherData || !weatherData.hourly || !weatherData.hourly.time) {
                 return;
             }
             
+            const times = weatherData.hourly.time;
+            const totalHours = times.length;
+            
+            // Group data by days (24 hours each)
+            for (let dayIndex = 0; dayIndex < FORECAST_DAYS && dayIndex * 24 < totalHours; dayIndex++) {
+                const startHour = dayIndex * 24;
+                const endHour = Math.min(startHour + 24, totalHours);
+                
+                const dayData = {
+                    date: times[startHour].split('T')[0],
+                    hours: []
+                };
+                
+                for (let hour = startHour; hour < endHour; hour++) {
+                    dayData.hours.push(hour);
+                }
+                
+                allDaysData.push(dayData);
+            }
+        }
+        
+        function createDaySelector() {
+            const selector = document.getElementById('daySelector');
+            selector.innerHTML = '';
+            
+            allDaysData.forEach((dayData, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'day-btn' + (index === 0 ? ' active' : '');
+                
+                const date = new Date(dayData.date + 'T00:00:00');
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                btn.textContent = dayName;
+                btn.setAttribute('data-day', index);
+                
+                btn.addEventListener('click', () => {
+                    currentDay = index;
+                    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Switch to circular or rating chart if on weekly view
+                    const activeTab = document.querySelector('.tab-btn.active');
+                    if (activeTab && activeTab.getAttribute('data-chart') === 'weekly') {
+                        document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                        document.querySelector('.tab-btn[data-chart="circular"]').classList.add('active');
+                        document.querySelectorAll('.chart-container').forEach(c => c.classList.remove('active'));
+                        document.getElementById('circularChartContainer').classList.add('active');
+                    }
+                    
+                    updateChart();
+                });
+                
+                selector.appendChild(btn);
+            });
+        }
+        
+        function updateChart() {
+            if (!weatherData || !marineData || allDaysData.length === 0) {
+                return;
+            }
+            
+            const activeTab = document.querySelector('.tab-btn.active');
+            const chartType = activeTab ? activeTab.getAttribute('data-chart') : 'circular';
+            
+            if (chartType === 'circular') {
+                drawCircularChartForDay(currentDay);
+            } else if (chartType === 'rating') {
+                drawRatingChartForDay(currentDay);
+            } else if (chartType === 'weekly') {
+                drawWeeklyChart();
+            }
+        }
+        
+        function drawCircularChartForDay(dayIndex) {
             const canvas = document.getElementById('mainCanvas');
             const ctx = canvas.getContext('2d');
             const width = canvas.width;
@@ -602,30 +843,191 @@
             
             ctx.clearRect(0, 0, width, height);
             
-            // Get current date and time for display
-            const now = new Date();
-            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (dayIndex >= allDaysData.length) return;
             
-            // Draw 24 hours
-            const hours = 24;
+            const dayData = allDaysData[dayIndex];
             const scores = [];
             
-            for (let i = 0; i < hours; i++) {
-                const time = new Date(todayStart.getTime() + i * 60 * 60 * 1000);
-                const score = calculateFishingScore(time);
-                scores.push({ hour: i, score, time });
+            // Calculate scores for each hour of the day
+            for (let hourOffset = 0; hourOffset < dayData.hours.length; hourOffset++) {
+                const hourIndex = dayData.hours[hourOffset];
+                const score = calculateFishingScoreForHour(hourIndex);
+                scores.push({ hour: hourOffset, score, hourIndex });
             }
             
             // Draw the circular chart
             drawCircularChart(ctx, centerX, centerY, radius, scores);
             
             // Update location title
+            const date = new Date(dayData.date + 'T00:00:00');
             document.getElementById('locationTitle').textContent = currentLocation.name;
-            document.getElementById('dateSubtitle').textContent = `${todayStart.toLocaleDateString()} - Fishing Conditions`;
+            document.getElementById('dateSubtitle').textContent = `${date.toLocaleDateString()} - Fishing Conditions`;
         }
         
-        function calculateFishingScore(time) {
-            const hourIndex = time.getHours();
+        function drawRatingChartForDay(dayIndex) {
+            const canvas = document.getElementById('ratingCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (dayIndex >= allDaysData.length) return;
+            
+            const dayData = allDaysData[dayIndex];
+            const scores = [];
+            
+            // Calculate scores for each hour of the day
+            for (let hourOffset = 0; hourOffset < dayData.hours.length; hourOffset++) {
+                const hourIndex = dayData.hours[hourOffset];
+                const score = calculateFishingScoreForHour(hourIndex);
+                scores.push({ hour: hourOffset, score });
+            }
+            
+            // Draw bar chart
+            const padding = 60;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            const barWidth = chartWidth / scores.length;
+            const barSpacing = barWidth * 0.1;
+            const actualBarWidth = barWidth - barSpacing;
+            
+            // Draw bars
+            scores.forEach((item, i) => {
+                const barHeight = item.score * chartHeight;
+                const x = padding + i * barWidth + barSpacing / 2;
+                const y = height - padding - barHeight;
+                
+                // Gradient for each bar
+                const gradient = ctx.createLinearGradient(x, y, x, height - padding);
+                gradient.addColorStop(0, '#764ba2');
+                gradient.addColorStop(1, '#667eea');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, actualBarWidth, barHeight);
+                
+                // Bar outline
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x, y, actualBarWidth, barHeight);
+                
+                // Hour labels at configured intervals
+                if (i % HOUR_LABEL_INTERVAL === 0) {
+                    ctx.fillStyle = '#333';
+                    ctx.font = '12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${item.hour}:00`, x + actualBarWidth / 2, height - padding + 20);
+                }
+                
+                // Score percentage on top
+                if (item.score > 0.1) {
+                    ctx.fillStyle = '#333';
+                    ctx.font = 'bold 10px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${Math.round(item.score * 100)}%`, x + actualBarWidth / 2, y - 5);
+                }
+            });
+            
+            // Draw baseline
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Update title
+            const date = new Date(dayData.date + 'T00:00:00');
+            document.getElementById('locationTitle').textContent = currentLocation.name;
+            document.getElementById('dateSubtitle').textContent = `${date.toLocaleDateString()} - Hourly Ratings`;
+        }
+        
+        function drawWeeklyChart() {
+            const canvas = document.getElementById('weeklyCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (allDaysData.length === 0) return;
+            
+            // Calculate average score for each day
+            const dailyAverages = allDaysData.map(dayData => {
+                let total = 0;
+                let count = 0;
+                
+                dayData.hours.forEach(hourIndex => {
+                    const score = calculateFishingScoreForHour(hourIndex);
+                    total += score;
+                    count++;
+                });
+                
+                return {
+                    date: dayData.date,
+                    average: count > 0 ? total / count : 0
+                };
+            });
+            
+            // Draw bar chart
+            const padding = 80;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            const barWidth = chartWidth / dailyAverages.length;
+            const barSpacing = barWidth * 0.2;
+            const actualBarWidth = barWidth - barSpacing;
+            
+            dailyAverages.forEach((item, i) => {
+                const barHeight = item.average * chartHeight;
+                const x = padding + i * barWidth + barSpacing / 2;
+                const y = height - padding - barHeight;
+                
+                // Gradient for each bar
+                const gradient = ctx.createLinearGradient(x, y, x, height - padding);
+                gradient.addColorStop(0, '#764ba2');
+                gradient.addColorStop(1, '#667eea');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, actualBarWidth, barHeight);
+                
+                // Bar outline
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, actualBarWidth, barHeight);
+                
+                // Date label
+                const date = new Date(item.date + 'T00:00:00');
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                ctx.fillStyle = '#333';
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.save();
+                ctx.translate(x + actualBarWidth / 2, height - padding + 30);
+                ctx.rotate(-Math.PI / 4);
+                ctx.fillText(dayName, 0, 0);
+                ctx.restore();
+                
+                // Score percentage on top
+                ctx.fillStyle = '#667eea';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${Math.round(item.average * 100)}%`, x + actualBarWidth / 2, y - 10);
+            });
+            
+            // Draw baseline
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Update title
+            document.getElementById('locationTitle').textContent = currentLocation.name;
+            document.getElementById('dateSubtitle').textContent = '7-Day Fishing Forecast Overview';
+        }
+        
+        function calculateFishingScoreForHour(hourIndex) {
             let totalScore = 0;
             let enabledCount = 0;
             
@@ -633,15 +1035,19 @@
             const weatherHourly = weatherData?.hourly;
             const marineHourly = marineData?.hourly;
             
+            // Get the timestamp for tide calculations
+            const timeString = weatherHourly?.time?.[hourIndex];
+            const time = timeString ? new Date(timeString) : null;
+            
             for (const [key, dataset] of Object.entries(datasets)) {
                 if (!dataset.enabled) continue;
                 
                 let value;
                 
                 try {
-                    if (key === 'tideHeight' && tideStation) {
+                    if (key === 'tideHeight' && tideStation && time) {
                         value = TideHarmonic.predictTideHeight(tideStation, time);
-                    } else if (key === 'tideMovement' && tideStation) {
+                    } else if (key === 'tideMovement' && tideStation && time) {
                         value = TideHarmonic.calculateTideMovement(tideStation, time);
                     } else if (key === 'windSpeed' && weatherHourly) {
                         value = weatherHourly.wind_speed_10m[hourIndex];
@@ -717,11 +1123,12 @@
                 ctx.arc(centerX, centerY, innerRadius, angle2, angle1, true);
                 ctx.closePath();
                 
-                // Color based on score using defined constants
-                const hue = CHART_COLORS.HUE_BASE - (score * CHART_COLORS.HUE_RANGE); // Blue to green gradient
-                const saturation = CHART_COLORS.SATURATION_BASE + (score * CHART_COLORS.SATURATION_RANGE);
-                const lightness = CHART_COLORS.LIGHTNESS_BASE + (score * CHART_COLORS.LIGHTNESS_RANGE);
-                ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                // Use gradient colors matching the rating chart
+                const r = Math.round(CHART_COLORS.RGB_LOW_R + score * (CHART_COLORS.RGB_HIGH_R - CHART_COLORS.RGB_LOW_R));
+                const g = Math.round(CHART_COLORS.RGB_LOW_G + score * (CHART_COLORS.RGB_HIGH_G - CHART_COLORS.RGB_LOW_G));
+                const b = Math.round(CHART_COLORS.RGB_LOW_B + score * (CHART_COLORS.RGB_HIGH_B - CHART_COLORS.RGB_LOW_B));
+                const alpha = CHART_COLORS.ALPHA_MIN + score * CHART_COLORS.ALPHA_RANGE;
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
                 ctx.fill();
                 
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
@@ -734,8 +1141,8 @@
                 const angle = (i / hours) * 2 * Math.PI - Math.PI / 2;
                 const hour = i;
                 
-                // Major markers every 3 hours
-                if (hour % 3 === 0) {
+                // Major markers at configured intervals
+                if (hour % HOUR_LABEL_INTERVAL === 0) {
                     const x1 = centerX + Math.cos(angle) * (radius - 15);
                     const y1 = centerY + Math.sin(angle) * (radius - 15);
                     const x2 = centerX + Math.cos(angle) * (radius + 5);
@@ -782,16 +1189,47 @@
             const legendContainer = document.getElementById('legend');
             legendContainer.innerHTML = '';
             
-            for (const [key, dataset] of Object.entries(datasets)) {
-                if (!dataset.enabled) continue;
-                
+            // For circular chart, show gradient legend that matches the actual colors
+            const activeTab = document.querySelector('.tab-btn.active');
+            const chartType = activeTab ? activeTab.getAttribute('data-chart') : 'circular';
+            
+            if (chartType === 'circular') {
                 const item = document.createElement('div');
                 item.className = 'legend-item';
                 item.innerHTML = `
-                    <div class="legend-color" style="background: ${dataset.color};"></div>
-                    <span><strong>${dataset.name}</strong></span>
+                    <div class="legend-color" style="background: linear-gradient(to right, rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 1));"></div>
+                    <span><strong>Fishing Score</strong> (Low → High)</span>
                 `;
                 legendContainer.appendChild(item);
+                
+                // Add enabled datasets info
+                const enabledDatasets = Object.entries(datasets)
+                    .filter(([_, dataset]) => dataset.enabled)
+                    .map(([_, dataset]) => dataset.name);
+                
+                if (enabledDatasets.length > 0) {
+                    const datasetsInfo = document.createElement('div');
+                    datasetsInfo.style.textAlign = 'center';
+                    datasetsInfo.style.width = '100%';
+                    datasetsInfo.style.marginTop = '10px';
+                    datasetsInfo.style.fontSize = '0.85em';
+                    datasetsInfo.style.color = '#666';
+                    datasetsInfo.innerHTML = `<em>Based on: ${enabledDatasets.join(', ')}</em>`;
+                    legendContainer.appendChild(datasetsInfo);
+                }
+            } else {
+                // For other charts, show individual datasets
+                for (const [key, dataset] of Object.entries(datasets)) {
+                    if (!dataset.enabled) continue;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    item.innerHTML = `
+                        <div class="legend-color" style="background: ${dataset.color};"></div>
+                        <span><strong>${dataset.name}</strong></span>
+                    `;
+                    legendContainer.appendChild(item);
+                }
             }
         }
         
