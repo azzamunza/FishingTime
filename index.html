@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishing Time - Best Times to Fish</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .controls-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-group label {
+            font-size: 0.85em;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .control-group input, .control-group select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 150px;
+            transition: border-color 0.3s;
+        }
+        
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .search-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .chart-section {
+            flex: 1;
+            min-width: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .controls-panel {
+            width: 350px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+        
+        .controls-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .controls-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .controls-panel::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
+        }
+        
+        .viz-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .viz-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+        
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .dataset-control {
+            background: #f5f7fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .dataset-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .dataset-header input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .dataset-header label {
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .range-control {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .range-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .range-label {
+            font-size: 0.85em;
+            color: #666;
+            min-width: 80px;
+        }
+        
+        .range-input {
+            flex: 1;
+            height: 6px;
+        }
+        
+        .range-value {
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: right;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            text-align: center;
+        }
+        
+        .info-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .info-text {
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        
+        .legend-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+        }
+        
+        .controls-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .chart-section {
+                min-width: 100%;
+            }
+            
+            .controls-panel {
+                width: 100%;
+                max-height: none;
+            }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: #ffebee;
+            border: 2px solid #ef5350;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #c62828;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎣 Fishing Time</h1>
+        
+        <div class="controls-section">
+            <div class="control-group">
+                <label for="latitude">Latitude</label>
+                <input type="text" id="latitude" value="-32.055" />
+            </div>
+            <div class="control-group">
+                <label for="longitude">Longitude</label>
+                <input type="text" id="longitude" value="115.745" />
+            </div>
+            <div class="control-group">
+                <label for="timezoneSelect">Timezone</label>
+                <select id="timezoneSelect">
+                    <option value="Australia/Perth" selected>Australia/Perth</option>
+                    <option value="UTC">UTC</option>
+                    <option value="Australia/Adelaide">Australia/Adelaide</option>
+                    <option value="Australia/Sydney">Australia/Sydney</option>
+                    <option value="Australia/Brisbane">Australia/Brisbane</option>
+                    <option value="Australia/Darwin">Australia/Darwin</option>
+                    <option value="Australia/Hobart">Australia/Hobart</option>
+                </select>
+            </div>
+            <button class="search-btn" id="fetchDataBtn">🔍 Get Fishing Conditions</button>
+        </div>
+        
+        <div class="main-content">
+            <div class="chart-section">
+                <h2 class="viz-title" id="locationTitle">Loading...</h2>
+                <p class="viz-subtitle" id="dateSubtitle">Select a location to view fishing conditions</p>
+                
+                <div class="canvas-container">
+                    <canvas id="mainCanvas" width="600" height="600"></canvas>
+                </div>
+                
+                <div class="legend" id="legend"></div>
+                
+                <div class="info-box">
+                    <div class="info-title">How to Read This Chart</div>
+                    <div class="info-text">
+                        This 24-hour circular chart shows the best fishing times throughout the day. 
+                        The chart is oriented with 12:00 noon at the top and 12:00 midnight at the bottom.
+                        6:00 AM is on the left, and 6:00 PM is on the right.
+                        Brighter/fuller areas indicate better fishing conditions based on your selected criteria.
+                        Each dataset (tide, wind, temperature, etc.) can be enabled/disabled and customized using the controls panel.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls-panel">
+                <h3 class="controls-title">Dataset Controls</h3>
+                <div id="datasetControls"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import * as TideHarmonic from './tide-harmonic.js';
+        
+        // Global state
+        let weatherData = null;
+        let marineData = null;
+        let tideStation = null;
+        let currentLocation = { name: 'Fremantle', lat: -32.055, lon: 115.745 };
+        let currentTimezone = 'Australia/Perth';
+        
+        // Dataset configurations
+        const datasets = {
+            tideHeight: {
+                name: 'Tide Height',
+                enabled: true,
+                color: '#1976d2',
+                min: -2,
+                max: 2,
+                idealMin: -0.5,
+                idealMax: 0.5,
+                unit: 'm'
+            },
+            tideMovement: {
+                name: 'Tide Movement',
+                enabled: true,
+                color: '#0288d1',
+                min: -1,
+                max: 1,
+                idealMin: 0.2,
+                idealMax: 0.8,
+                unit: 'm/h'
+            },
+            windSpeed: {
+                name: 'Wind Speed',
+                enabled: true,
+                color: '#32dbae',
+                min: 0,
+                max: 30,
+                idealMin: 0,
+                idealMax: 15,
+                unit: 'km/h'
+            },
+            temperature: {
+                name: 'Temperature',
+                enabled: true,
+                color: '#F28C28',
+                min: 10,
+                max: 40,
+                idealMin: 18,
+                idealMax: 28,
+                unit: '°C'
+            },
+            cloudCover: {
+                name: 'Cloud Cover',
+                enabled: true,
+                color: '#c1cad9',
+                min: 0,
+                max: 100,
+                idealMin: 0,
+                idealMax: 60,
+                unit: '%'
+            },
+            pressure: {
+                name: 'Pressure',
+                enabled: true,
+                color: '#9c27b0',
+                min: 990,
+                max: 1030,
+                idealMin: 1010,
+                idealMax: 1020,
+                unit: 'hPa'
+            },
+            waveHeight: {
+                name: 'Wave Height',
+                enabled: true,
+                color: '#2196f3',
+                min: 0,
+                max: 3,
+                idealMin: 0,
+                idealMax: 1,
+                unit: 'm'
+            }
+        };
+        
+        // Initialize
+        async function init() {
+            try {
+                await TideHarmonic.loadStations('./stations.json');
+                console.log('Tide stations loaded successfully');
+                renderDatasetControls();
+                attachEventListeners();
+            } catch (error) {
+                console.error('Failed to initialize:', error);
+                showError('Failed to load tide station data');
+            }
+        }
+        
+        function attachEventListeners() {
+            document.getElementById('fetchDataBtn').addEventListener('click', fetchData);
+        }
+        
+        function renderDatasetControls() {
+            const container = document.getElementById('datasetControls');
+            container.innerHTML = '';
+            
+            for (const [key, dataset] of Object.entries(datasets)) {
+                const control = createDatasetControl(key, dataset);
+                container.appendChild(control);
+            }
+        }
+        
+        function createDatasetControl(key, dataset) {
+            const div = document.createElement('div');
+            div.className = 'dataset-control';
+            
+            div.innerHTML = `
+                <div class="dataset-header">
+                    <input type="checkbox" id="enable_${key}" ${dataset.enabled ? 'checked' : ''}>
+                    <label for="enable_${key}">${dataset.name}</label>
+                </div>
+                <div class="range-control">
+                    <div class="range-row">
+                        <span class="range-label">Min</span>
+                        <input type="range" class="range-input" id="min_${key}" 
+                               min="${dataset.min}" max="${dataset.max}" 
+                               value="${dataset.min}" step="0.1">
+                        <span class="range-value" id="minval_${key}">${dataset.min}${dataset.unit}</span>
+                    </div>
+                    <div class="range-row">
+                        <span class="range-label">Ideal Min</span>
+                        <input type="range" class="range-input" id="idealmin_${key}" 
+                               min="${dataset.min}" max="${dataset.max}" 
+                               value="${dataset.idealMin}" step="0.1">
+                        <span class="range-value" id="idealminval_${key}">${dataset.idealMin}${dataset.unit}</span>
+                    </div>
+                    <div class="range-row">
+                        <span class="range-label">Ideal Max</span>
+                        <input type="range" class="range-input" id="idealmax_${key}" 
+                               min="${dataset.min}" max="${dataset.max}" 
+                               value="${dataset.idealMax}" step="0.1">
+                        <span class="range-value" id="idealmaxval_${key}">${dataset.idealMax}${dataset.unit}</span>
+                    </div>
+                    <div class="range-row">
+                        <span class="range-label">Max</span>
+                        <input type="range" class="range-input" id="max_${key}" 
+                               min="${dataset.min}" max="${dataset.max}" 
+                               value="${dataset.max}" step="0.1">
+                        <span class="range-value" id="maxval_${key}">${dataset.max}${dataset.unit}</span>
+                    </div>
+                </div>
+            `;
+            
+            // Attach event listeners
+            const checkbox = div.querySelector(`#enable_${key}`);
+            checkbox.addEventListener('change', (e) => {
+                dataset.enabled = e.target.checked;
+                updateChart();
+            });
+            
+            const sliders = ['min', 'idealmin', 'idealmax', 'max'];
+            sliders.forEach(slider => {
+                const input = div.querySelector(`#${slider}_${key}`);
+                const valueSpan = div.querySelector(`#${slider}val_${key}`);
+                
+                input.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    valueSpan.textContent = `${value}${dataset.unit}`;
+                    
+                    if (slider === 'min') dataset.min = value;
+                    else if (slider === 'idealmin') dataset.idealMin = value;
+                    else if (slider === 'idealmax') dataset.idealMax = value;
+                    else if (slider === 'max') dataset.max = value;
+                    
+                    updateChart();
+                });
+            });
+            
+            return div;
+        }
+        
+        async function fetchData() {
+            const lat = parseFloat(document.getElementById('latitude').value);
+            const lon = parseFloat(document.getElementById('longitude').value);
+            const timezone = document.getElementById('timezoneSelect').value;
+            
+            if (isNaN(lat) || isNaN(lon)) {
+                showError('Invalid latitude or longitude');
+                return;
+            }
+            
+            currentLocation = { lat, lon, name: `${lat.toFixed(2)}, ${lon.toFixed(2)}` };
+            currentTimezone = timezone;
+            
+            document.getElementById('locationTitle').textContent = 'Loading...';
+            document.getElementById('dateSubtitle').textContent = 'Fetching data...';
+            
+            try {
+                // Fetch weather data
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,pressure_msl,precipitation_probability,rain,relative_humidity_2m,apparent_temperature&timezone=${timezone}`;
+                const weatherResponse = await fetch(weatherUrl);
+                weatherData = await weatherResponse.json();
+                
+                // Fetch marine data
+                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,sea_surface_temperature,wave_direction,wave_period,tertiary_swell_wave_height,tertiary_swell_wave_period,tertiary_swell_wave_direction&timezone=${timezone}`;
+                const marineResponse = await fetch(marineUrl);
+                marineData = await marineResponse.json();
+                
+                // Find nearest tide station
+                tideStation = TideHarmonic.findNearestStation(lat, lon);
+                
+                updateChart();
+                updateLegend();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                showError('Failed to fetch weather or marine data');
+            }
+        }
+        
+        function updateChart() {
+            if (!weatherData || !marineData) {
+                return;
+            }
+            
+            const canvas = document.getElementById('mainCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 2 - 60;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Get current date and time for display
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            // Draw 24 hours
+            const hours = 24;
+            const scores = [];
+            
+            for (let i = 0; i < hours; i++) {
+                const time = new Date(todayStart.getTime() + i * 60 * 60 * 1000);
+                const score = calculateFishingScore(time);
+                scores.push({ hour: i, score, time });
+            }
+            
+            // Draw the circular chart
+            drawCircularChart(ctx, centerX, centerY, radius, scores);
+            
+            // Update location title
+            document.getElementById('locationTitle').textContent = currentLocation.name;
+            document.getElementById('dateSubtitle').textContent = `${todayStart.toLocaleDateString()} - Fishing Conditions`;
+        }
+        
+        function calculateFishingScore(time) {
+            const hourIndex = time.getHours();
+            let totalScore = 0;
+            let enabledCount = 0;
+            
+            for (const [key, dataset] of Object.entries(datasets)) {
+                if (!dataset.enabled) continue;
+                
+                let value;
+                
+                try {
+                    if (key === 'tideHeight' && tideStation) {
+                        value = TideHarmonic.predictTideHeight(tideStation, time);
+                    } else if (key === 'tideMovement' && tideStation) {
+                        value = TideHarmonic.calculateTideMovement(tideStation, time);
+                    } else if (key === 'windSpeed' && weatherData.hourly) {
+                        value = weatherData.hourly.wind_speed_10m[hourIndex];
+                    } else if (key === 'temperature' && weatherData.hourly) {
+                        value = weatherData.hourly.temperature_2m[hourIndex];
+                    } else if (key === 'cloudCover' && weatherData.hourly) {
+                        value = weatherData.hourly.cloud_cover[hourIndex];
+                    } else if (key === 'pressure' && weatherData.hourly) {
+                        value = weatherData.hourly.pressure_msl[hourIndex];
+                    } else if (key === 'waveHeight' && marineData.hourly) {
+                        value = marineData.hourly.wave_height[hourIndex];
+                    } else {
+                        continue;
+                    }
+                    
+                    if (value === null || value === undefined) continue;
+                    
+                    const score = normalizeScore(value, dataset);
+                    totalScore += score;
+                    enabledCount++;
+                } catch (error) {
+                    console.error(`Error calculating ${key}:`, error);
+                }
+            }
+            
+            return enabledCount > 0 ? totalScore / enabledCount : 0;
+        }
+        
+        function normalizeScore(value, dataset) {
+            const { min, max, idealMin, idealMax } = dataset;
+            
+            // Value outside acceptable range
+            if (value < min || value > max) {
+                return 0;
+            }
+            
+            // Value in ideal range
+            if (value >= idealMin && value <= idealMax) {
+                return 1;
+            }
+            
+            // Value between min and idealMin
+            if (value < idealMin) {
+                return (value - min) / (idealMin - min);
+            }
+            
+            // Value between idealMax and max
+            return 1 - (value - idealMax) / (max - idealMax);
+        }
+        
+        function drawCircularChart(ctx, centerX, centerY, radius, scores) {
+            const hours = scores.length;
+            
+            // Draw background circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw score segments
+            for (let i = 0; i < hours; i++) {
+                const angle1 = (i / hours) * 2 * Math.PI - Math.PI / 2; // Start at top (12 noon)
+                const angle2 = ((i + 1) / hours) * 2 * Math.PI - Math.PI / 2;
+                
+                const score = scores[i].score;
+                const innerRadius = radius * 0.3;
+                const outerRadius = radius * (0.3 + 0.7 * score);
+                
+                // Draw segment
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, angle1, angle2);
+                ctx.arc(centerX, centerY, innerRadius, angle2, angle1, true);
+                ctx.closePath();
+                
+                // Color based on score
+                const hue = 200 - (score * 80); // Blue to green gradient
+                const saturation = 70 + (score * 30);
+                const lightness = 40 + (score * 20);
+                ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            
+            // Draw hour markers and labels
+            for (let i = 0; i < hours; i++) {
+                const angle = (i / hours) * 2 * Math.PI - Math.PI / 2;
+                const hour = i;
+                
+                // Major markers every 3 hours
+                if (hour % 3 === 0) {
+                    const x1 = centerX + Math.cos(angle) * (radius - 15);
+                    const y1 = centerY + Math.sin(angle) * (radius - 15);
+                    const x2 = centerX + Math.cos(angle) * (radius + 5);
+                    const y2 = centerY + Math.sin(angle) * (radius + 5);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Label
+                    const labelX = centerX + Math.cos(angle) * (radius + 30);
+                    const labelY = centerY + Math.sin(angle) * (radius + 30);
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = 'bold 14px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(`${hour}:00`, labelX, labelY);
+                }
+            }
+            
+            // Draw center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.3, 0, 2 * Math.PI);
+            ctx.fillStyle = '#f5f7fa';
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw center text
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('24 Hour', centerX, centerY - 10);
+            ctx.fillText('Forecast', centerX, centerY + 10);
+        }
+        
+        function updateLegend() {
+            const legendContainer = document.getElementById('legend');
+            legendContainer.innerHTML = '';
+            
+            for (const [key, dataset] of Object.entries(datasets)) {
+                if (!dataset.enabled) continue;
+                
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${dataset.color};"></div>
+                    <span><strong>${dataset.name}</strong></span>
+                `;
+                legendContainer.appendChild(item);
+            }
+        }
+        
+        function showError(message) {
+            const chartSection = document.querySelector('.chart-section');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            chartSection.insertBefore(errorDiv, chartSection.firstChild);
+            
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+        
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
