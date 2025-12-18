@@ -4,7 +4,12 @@ A web-based tool for identifying the best times of day to go fishing at any loca
 
 ## Features
 
-- **24-Hour Circular Visualization**: Full-day fishing forecast displayed on an intuitive circular chart
+- **7-Day Forecast**: View fishing conditions for the entire week ahead
+- **Multiple Chart Types**: Choose from 3 visualization modes:
+  - **24-Hour Circular Chart**: Full-day fishing forecast on an intuitive radial chart
+  - **Hourly Rating Chart**: Bar chart showing fishing scores for each hour
+  - **Weekly Overview Chart**: Compare daily average conditions across the week
+- **Day Navigation**: Easy-to-use day selector buttons to navigate through the 7-day forecast
 - **Client-Side Tide Prediction**: Harmonic tide calculations without external API dependencies
 - **Customizable Datasets**: Enable/disable and adjust acceptable ranges for each environmental factor
 - **Real-Time Weather & Marine Data**: Integration with Open-Meteo APIs for current conditions
@@ -144,9 +149,14 @@ To add a new tide station to `stations.json`:
 
 1. **Enter Location**: Input latitude and longitude for your fishing spot
 2. **Select Timezone**: Choose appropriate timezone for time display
-3. **Fetch Data**: Click "Get Fishing Conditions" to load forecast
-4. **Customize**: Use the dataset controls to enable/disable factors and adjust ideal ranges
-5. **Read Chart**: Brighter areas indicate better fishing conditions
+3. **Fetch Data**: Click "Get Fishing Conditions" to load 7-day forecast
+4. **Navigate Days**: Use the day selector buttons to view different days in the forecast
+5. **Switch Chart Types**: Click the chart type tabs to switch between visualization modes
+6. **Customize**: Use the dataset controls to enable/disable factors and adjust ideal ranges
+7. **Read Charts**: 
+   - **Circular Chart**: Brighter/fuller areas indicate better fishing conditions
+   - **Rating Chart**: Higher bars show better fishing scores for each hour
+   - **Weekly Overview**: Compare which days have the best overall conditions
 
 ### Chart Orientation
 
