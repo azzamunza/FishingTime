@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FishingTime - Perth Fishing Conditions</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎣 FishingTime</h1>
+      <p class="subtitle">Find the best time to go fishing in Perth</p>
+    </header>
+
+    <div id="loading" class="loading">Loading...</div>
+    <div id="error-message" class="error-message" style="display: none;"></div>
+
+    <main>
+      <section class="station-selector-section">
+        <label for="station-selector">Select Location:</label>
+        <select id="station-selector" class="station-selector">
+          <option>Loading stations...</option>
+        </select>
+      </section>
+
+      <section class="fishing-score-section">
+        <h2>Fishing Conditions</h2>
+        <div id="fishing-score" class="fishing-score">
+          <!-- Score will be inserted here -->
+        </div>
+        <div id="score-factors" class="score-factors">
+          <!-- Factors will be listed here -->
+        </div>
+      </section>
+
+      <section class="tide-section">
+        <h2>Tide Information</h2>
+        <div class="info-box">
+          <div id="current-tide" class="info-row">Loading...</div>
+          <div id="next-high" class="info-row">Loading...</div>
+          <div id="next-low" class="info-row">Loading...</div>
+        </div>
+        
+        <h3>48-Hour Tide Chart</h3>
+        <canvas id="tide-chart" width="800" height="300" class="tide-chart"></canvas>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot high"></span> High Tide</span>
+          <span class="legend-item"><span class="legend-dot low"></span> Low Tide</span>
+        </div>
+      </section>
+
+      <section class="weather-section">
+        <h2>Weather Conditions</h2>
+        <div id="weather-info" class="info-box">
+          Loading...
+        </div>
+      </section>
+
+      <section class="marine-section">
+        <h2>Marine Conditions</h2>
+        <div id="marine-info" class="info-box">
+          Loading...
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Data sources: Tidal harmonic analysis, <a href="https://open-meteo.com" target="_blank">Open-Meteo</a></p>
+      <p class="disclaimer">
+        ⚠️ Tide predictions are astronomical only and do not include weather effects. 
+        Always check current conditions and forecasts before heading out.
+      </p>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
