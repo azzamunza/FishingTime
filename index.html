@@ -208,10 +208,13 @@
         
         canvas {
             display: block;
+            border-radius: 8px;
+        }
+        
+        .tide-chart {
             width: 100%;
             max-width: 800px;
             height: auto;
-            border-radius: 8px;
         }
         
         .chart-legend {
@@ -332,7 +335,7 @@
                 
                 <h3>48-Hour Tide Chart</h3>
                 <div class="canvas-container">
-                    <canvas id="tide-chart" width="800" height="300"></canvas>
+                    <canvas id="tide-chart" width="800" height="300" class="tide-chart"></canvas>
                 </div>
                 <div class="chart-legend">
                     <span class="legend-item"><span class="legend-dot high"></span> High Tide</span>
