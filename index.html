@@ -489,14 +489,21 @@
     <script type="module">
         import * as TideHarmonic from './tide-harmonic.js';
         
+        // Configuration constants
+        const FORECAST_DAYS = 7;  // Number of days to fetch from API
+        const HOUR_LABEL_INTERVAL = 3;  // Show hour labels every N hours
+        
         // Color gradient constants for chart visualization
         const CHART_COLORS = {
-            HUE_BASE: 200,        // Blue hue for low scores
-            HUE_RANGE: 80,        // Range to green for high scores
-            SATURATION_BASE: 70,  // Base saturation percentage
-            SATURATION_RANGE: 30, // Additional saturation for high scores
-            LIGHTNESS_BASE: 40,   // Base lightness percentage
-            LIGHTNESS_RANGE: 20   // Additional lightness for high scores
+            // RGB gradient from low to high score (purple-blue to violet)
+            RGB_LOW_R: 102,    // Red component for low scores
+            RGB_HIGH_R: 118,   // Red component for high scores
+            RGB_LOW_G: 126,    // Green component for low scores
+            RGB_HIGH_G: 75,    // Green component for high scores
+            RGB_LOW_B: 234,    // Blue component for low scores
+            RGB_HIGH_B: 162,   // Blue component for high scores
+            ALPHA_MIN: 0.7,    // Minimum alpha transparency
+            ALPHA_RANGE: 0.3   // Additional alpha for high scores
         };
         
         // Global state
@@ -718,13 +725,13 @@
             document.getElementById('dateSubtitle').textContent = 'Fetching data...';
             
             try {
-                // Fetch 7 days of weather data (forecast_days defaults to 7)
-                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,pressure_msl,precipitation_probability,rain,relative_humidity_2m,apparent_temperature&timezone=${timezone}&forecast_days=7`;
+                // Fetch weather data for configured number of days
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,cloud_cover,surface_pressure,pressure_msl,precipitation_probability,rain,relative_humidity_2m,apparent_temperature&timezone=${timezone}&forecast_days=${FORECAST_DAYS}`;
                 const weatherResponse = await fetch(weatherUrl);
                 weatherData = await weatherResponse.json();
                 
-                // Fetch 7 days of marine data
-                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,sea_surface_temperature,wave_direction,wave_period,tertiary_swell_wave_height,tertiary_swell_wave_period,tertiary_swell_wave_direction&timezone=${timezone}&forecast_days=7`;
+                // Fetch marine data for configured number of days
+                const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,sea_surface_temperature,wave_direction,wave_period,tertiary_swell_wave_height,tertiary_swell_wave_period,tertiary_swell_wave_direction&timezone=${timezone}&forecast_days=${FORECAST_DAYS}`;
                 const marineResponse = await fetch(marineUrl);
                 marineData = await marineResponse.json();
                 
@@ -757,7 +764,7 @@
             const totalHours = times.length;
             
             // Group data by days (24 hours each)
-            for (let dayIndex = 0; dayIndex < 7 && dayIndex * 24 < totalHours; dayIndex++) {
+            for (let dayIndex = 0; dayIndex < FORECAST_DAYS && dayIndex * 24 < totalHours; dayIndex++) {
                 const startHour = dayIndex * 24;
                 const endHour = Math.min(startHour + 24, totalHours);
                 
@@ -904,8 +911,8 @@
                 ctx.lineWidth = 1;
                 ctx.strokeRect(x, y, actualBarWidth, barHeight);
                 
-                // Hour labels (every 3 hours)
-                if (i % 3 === 0) {
+                // Hour labels at configured intervals
+                if (i % HOUR_LABEL_INTERVAL === 0) {
                     ctx.fillStyle = '#333';
                     ctx.font = '12px sans-serif';
                     ctx.textAlign = 'center';
@@ -1117,11 +1124,11 @@
                 ctx.closePath();
                 
                 // Use gradient colors matching the rating chart
-                // Low scores: more purple/blue (#667eea), High scores: more violet (#764ba2)
-                const r = Math.round(102 + score * 16);  // 102->118
-                const g = Math.round(126 - score * 51);  // 126->75
-                const b = Math.round(234 - score * 72);  // 234->162
-                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.7 + score * 0.3})`;
+                const r = Math.round(CHART_COLORS.RGB_LOW_R + score * (CHART_COLORS.RGB_HIGH_R - CHART_COLORS.RGB_LOW_R));
+                const g = Math.round(CHART_COLORS.RGB_LOW_G + score * (CHART_COLORS.RGB_HIGH_G - CHART_COLORS.RGB_LOW_G));
+                const b = Math.round(CHART_COLORS.RGB_LOW_B + score * (CHART_COLORS.RGB_HIGH_B - CHART_COLORS.RGB_LOW_B));
+                const alpha = CHART_COLORS.ALPHA_MIN + score * CHART_COLORS.ALPHA_RANGE;
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
                 ctx.fill();
                 
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
@@ -1134,8 +1141,8 @@
                 const angle = (i / hours) * 2 * Math.PI - Math.PI / 2;
                 const hour = i;
                 
-                // Major markers every 3 hours
-                if (hour % 3 === 0) {
+                // Major markers at configured intervals
+                if (hour % HOUR_LABEL_INTERVAL === 0) {
                     const x1 = centerX + Math.cos(angle) * (radius - 15);
                     const y1 = centerY + Math.sin(angle) * (radius - 15);
                     const x2 = centerX + Math.cos(angle) * (radius + 5);
