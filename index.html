@@ -335,7 +335,7 @@
                 <p class="viz-subtitle" id="dateSubtitle">Select a location to view fishing conditions</p>
                 
                 <div class="canvas-container">
-                    <canvas id="mainCanvas" width="600" height="600"></canvas>
+                    <canvas id="mainCanvas" width="600" height="600" aria-label="24-hour circular fishing forecast chart showing optimal fishing times throughout the day"></canvas>
                 </div>
                 
                 <div class="legend" id="legend"></div>
@@ -361,6 +361,16 @@
     
     <script type="module">
         import * as TideHarmonic from './tide-harmonic.js';
+        
+        // Color gradient constants for chart visualization
+        const CHART_COLORS = {
+            HUE_BASE: 200,        // Blue hue for low scores
+            HUE_RANGE: 80,        // Range to green for high scores
+            SATURATION_BASE: 70,  // Base saturation percentage
+            SATURATION_RANGE: 30, // Additional saturation for high scores
+            LIGHTNESS_BASE: 40,   // Base lightness percentage
+            LIGHTNESS_RANGE: 20   // Additional lightness for high scores
+        };
         
         // Global state
         let weatherData = null;
@@ -619,6 +629,10 @@
             let totalScore = 0;
             let enabledCount = 0;
             
+            // Cache hourly data references
+            const weatherHourly = weatherData?.hourly;
+            const marineHourly = marineData?.hourly;
+            
             for (const [key, dataset] of Object.entries(datasets)) {
                 if (!dataset.enabled) continue;
                 
@@ -629,16 +643,16 @@
                         value = TideHarmonic.predictTideHeight(tideStation, time);
                     } else if (key === 'tideMovement' && tideStation) {
                         value = TideHarmonic.calculateTideMovement(tideStation, time);
-                    } else if (key === 'windSpeed' && weatherData.hourly) {
-                        value = weatherData.hourly.wind_speed_10m[hourIndex];
-                    } else if (key === 'temperature' && weatherData.hourly) {
-                        value = weatherData.hourly.temperature_2m[hourIndex];
-                    } else if (key === 'cloudCover' && weatherData.hourly) {
-                        value = weatherData.hourly.cloud_cover[hourIndex];
-                    } else if (key === 'pressure' && weatherData.hourly) {
-                        value = weatherData.hourly.pressure_msl[hourIndex];
-                    } else if (key === 'waveHeight' && marineData.hourly) {
-                        value = marineData.hourly.wave_height[hourIndex];
+                    } else if (key === 'windSpeed' && weatherHourly) {
+                        value = weatherHourly.wind_speed_10m[hourIndex];
+                    } else if (key === 'temperature' && weatherHourly) {
+                        value = weatherHourly.temperature_2m[hourIndex];
+                    } else if (key === 'cloudCover' && weatherHourly) {
+                        value = weatherHourly.cloud_cover[hourIndex];
+                    } else if (key === 'pressure' && weatherHourly) {
+                        value = weatherHourly.pressure_msl[hourIndex];
+                    } else if (key === 'waveHeight' && marineHourly) {
+                        value = marineHourly.wave_height[hourIndex];
                     } else {
                         continue;
                     }
@@ -703,10 +717,10 @@
                 ctx.arc(centerX, centerY, innerRadius, angle2, angle1, true);
                 ctx.closePath();
                 
-                // Color based on score
-                const hue = 200 - (score * 80); // Blue to green gradient
-                const saturation = 70 + (score * 30);
-                const lightness = 40 + (score * 20);
+                // Color based on score using defined constants
+                const hue = CHART_COLORS.HUE_BASE - (score * CHART_COLORS.HUE_RANGE); // Blue to green gradient
+                const saturation = CHART_COLORS.SATURATION_BASE + (score * CHART_COLORS.SATURATION_RANGE);
+                const lightness = CHART_COLORS.LIGHTNESS_BASE + (score * CHART_COLORS.LIGHTNESS_RANGE);
                 ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
                 ctx.fill();
                 

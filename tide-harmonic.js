@@ -127,6 +127,10 @@ export function predictTideHeight(station, date) {
     const datum = station.datum || 0;
     
     // Calculate time in hours since epoch (J2000.0: 2000-01-01 12:00:00 UTC)
+    // J2000.0 is a standard astronomical epoch used as a reference point for celestial mechanics
+    // It provides a common time base for tidal predictions and ensures consistency across
+    // different implementations. The tidal constituent speeds and phases are referenced to
+    // this epoch, making calculations reproducible and accurate.
     const epoch = new Date(Date.UTC(2000, 0, 1, 12, 0, 0));
     const hoursFromEpoch = (date.getTime() - epoch.getTime()) / (1000 * 60 * 60);
     
