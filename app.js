@@ -319,10 +319,16 @@ function updateTideChart() {
   
   ctx.stroke();
   
+  // Build a map for efficient time lookup
+  const timeToIndexMap = new Map();
+  series.forEach((point, index) => {
+    timeToIndexMap.set(point.time.getTime(), index);
+  });
+  
   // Draw high/low tide markers
   highs.forEach(high => {
-    const index = series.findIndex(s => s.time.getTime() === high.time.getTime());
-    if (index !== -1) {
+    const index = timeToIndexMap.get(high.time.getTime());
+    if (index !== undefined) {
       const x = padding + (index / (series.length - 1)) * chartWidth;
       const y = canvas.height - padding - ((high.height - minHeight) / heightRange) * chartHeight;
       
@@ -334,8 +340,8 @@ function updateTideChart() {
   });
   
   lows.forEach(low => {
-    const index = series.findIndex(s => s.time.getTime() === low.time.getTime());
-    if (index !== -1) {
+    const index = timeToIndexMap.get(low.time.getTime());
+    if (index !== undefined) {
       const x = padding + (index / (series.length - 1)) * chartWidth;
       const y = canvas.height - padding - ((low.height - minHeight) / heightRange) * chartHeight;
       
@@ -400,9 +406,29 @@ if (document.readyState === 'loading') {
   init();
 }
 
-// Refresh data every 5 minutes
-setInterval(() => {
-  if (currentStation) {
-    loadStation(currentStation.id);
+// Refresh data every 5 minutes (with cleanup on page unload)
+let refreshInterval = null;
+
+function startAutoRefresh() {
+  // Clear any existing interval
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
   }
-}, 5 * 60 * 1000);
+  
+  // Set up new refresh interval
+  refreshInterval = setInterval(() => {
+    if (currentStation) {
+      loadStation(currentStation.id);
+    }
+  }, 5 * 60 * 1000);
+}
+
+// Start auto-refresh
+startAutoRefresh();
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
+});

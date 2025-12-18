@@ -84,6 +84,28 @@ export async function fetchMarineData(latitude, longitude, timezone) {
 }
 
 /**
+ * Find the closest time index in hourly data array
+ * @param {Array<string>} timeArray - Array of ISO timestamp strings
+ * @param {Date} targetTime - Target time to find
+ * @returns {number} Index of closest time
+ */
+function findClosestTimeIndex(timeArray, targetTime = new Date()) {
+  let closestIndex = 0;
+  let minDiff = Infinity;
+  
+  for (let i = 0; i < timeArray.length; i++) {
+    const time = new Date(timeArray[i]);
+    const diff = Math.abs(time - targetTime);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestIndex = i;
+    }
+  }
+  
+  return closestIndex;
+}
+
+/**
  * Get current weather conditions from weather data
  * @param {Object} weatherData - Weather data from API
  * @returns {Object} Current weather conditions
@@ -93,21 +115,8 @@ export function getCurrentWeather(weatherData) {
     return null;
   }
 
-  const now = new Date();
   const hourly = weatherData.hourly;
-  
-  // Find the closest time index
-  let closestIndex = 0;
-  let minDiff = Infinity;
-  
-  for (let i = 0; i < hourly.time.length; i++) {
-    const time = new Date(hourly.time[i]);
-    const diff = Math.abs(time - now);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestIndex = i;
-    }
-  }
+  const closestIndex = findClosestTimeIndex(hourly.time);
 
   return {
     time: new Date(hourly.time[closestIndex]),
@@ -132,21 +141,8 @@ export function getCurrentMarine(marineData) {
     return null;
   }
 
-  const now = new Date();
   const hourly = marineData.hourly;
-  
-  // Find the closest time index
-  let closestIndex = 0;
-  let minDiff = Infinity;
-  
-  for (let i = 0; i < hourly.time.length; i++) {
-    const time = new Date(hourly.time[i]);
-    const diff = Math.abs(time - now);
-    if (diff < minDiff) {
-      minDiff = diff;
-      closestIndex = i;
-    }
-  }
+  const closestIndex = findClosestTimeIndex(hourly.time);
 
   return {
     time: new Date(hourly.time[closestIndex]),
@@ -195,16 +191,19 @@ export function getForecast(weatherData, marineData, hours = 168) {
   return forecast;
 }
 
+// Constants for wind direction calculation
+const WIND_DIRECTIONS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                         'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+const DEGREES_PER_DIRECTION = 360 / WIND_DIRECTIONS.length; // 22.5 degrees
+
 /**
  * Get wind direction as cardinal direction
  * @param {number} degrees - Wind direction in degrees
  * @returns {string} Cardinal direction (e.g., 'N', 'NE', 'E')
  */
 export function getWindDirection(degrees) {
-  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-                      'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-  const index = Math.round(degrees / 22.5) % 16;
-  return directions[index];
+  const index = Math.round(degrees / DEGREES_PER_DIRECTION) % WIND_DIRECTIONS.length;
+  return WIND_DIRECTIONS[index];
 }
 
 /**
