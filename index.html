@@ -1,79 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FishingTime - Perth Fishing Conditions</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FishingTime - Perth Fishing Conditions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .viz-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .viz-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .viz-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1em;
+        }
+        
+        .station-selector-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .station-selector-section label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .station-selector {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: white;
+            color: #667eea;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 200px;
+        }
+        
+        .station-selector:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: white;
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border: 2px solid #ef5350;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #c62828;
+            font-weight: bold;
+        }
+        
+        .fishing-score-section {
+            margin-bottom: 30px;
+        }
+        
+        .fishing-score-section h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .fishing-score {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .score-rating {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .score-description {
+            font-size: 1em;
+            color: #666;
+        }
+        
+        .score-factors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .factor-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .factor-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .factor-value {
+            font-size: 1.1em;
+            color: #667eea;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-row {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            font-size: 1em;
+            color: #333;
+        }
+        
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        h3 {
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1em;
+        }
+        
+        .legend-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        
+        .legend-dot.high {
+            background: #2196F3;
+        }
+        
+        .legend-dot.low {
+            background: #FF9800;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border: 2px solid #ef5350;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .warning-title {
+            font-weight: bold;
+            color: #c62828;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .warning-text {
+            color: #d32f2f;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        
+        footer {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            color: #666;
+        }
+        
+        footer p {
+            margin-bottom: 10px;
+        }
+        
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .disclaimer {
+            font-size: 0.9em;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🎣 FishingTime</h1>
-      <p class="subtitle">Find the best time to go fishing in Perth</p>
-    </header>
-
-    <div id="loading" class="loading">Loading...</div>
-    <div id="error-message" class="error-message" style="display: none;"></div>
-
-    <main>
-      <section class="station-selector-section">
-        <label for="station-selector">Select Location:</label>
-        <select id="station-selector" class="station-selector">
-          <option>Loading stations...</option>
-        </select>
-      </section>
-
-      <section class="fishing-score-section">
-        <h2>Fishing Conditions</h2>
-        <div id="fishing-score" class="fishing-score">
-          <!-- Score will be inserted here -->
-        </div>
-        <div id="score-factors" class="score-factors">
-          <!-- Factors will be listed here -->
-        </div>
-      </section>
-
-      <section class="tide-section">
-        <h2>Tide Information</h2>
-        <div class="info-box">
-          <div id="current-tide" class="info-row">Loading...</div>
-          <div id="next-high" class="info-row">Loading...</div>
-          <div id="next-low" class="info-row">Loading...</div>
-        </div>
+    <div class="container">
+        <h1>🎣 FishingTime</h1>
         
-        <h3>48-Hour Tide Chart</h3>
-        <canvas id="tide-chart" width="800" height="300" class="tide-chart"></canvas>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="legend-dot high"></span> High Tide</span>
-          <span class="legend-item"><span class="legend-dot low"></span> Low Tide</span>
+        <div id="loading" class="loading">Loading...</div>
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        
+        <div class="viz-card">
+            <h2 class="viz-title">Perth Fishing Conditions</h2>
+            <p class="viz-subtitle">Find the best time to go fishing</p>
+            
+            <section class="station-selector-section">
+                <label for="station-selector">Select Location:</label>
+                <select id="station-selector" class="station-selector">
+                    <option>Loading stations...</option>
+                </select>
+            </section>
+
+            <section class="fishing-score-section">
+                <h2>Fishing Conditions</h2>
+                <div id="fishing-score" class="fishing-score">
+                    <!-- Score will be inserted here -->
+                </div>
+                <div id="score-factors" class="score-factors">
+                    <!-- Factors will be listed here -->
+                </div>
+            </section>
+
+            <section class="tide-section">
+                <h2>Tide Information</h2>
+                <div class="info-box">
+                    <div id="current-tide" class="info-row">Loading...</div>
+                    <div id="next-high" class="info-row">Loading...</div>
+                    <div id="next-low" class="info-row">Loading...</div>
+                </div>
+                
+                <h3>48-Hour Tide Chart</h3>
+                <div class="canvas-container">
+                    <canvas id="tide-chart" width="800" height="300"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-dot high"></span> High Tide</span>
+                    <span class="legend-item"><span class="legend-dot low"></span> Low Tide</span>
+                </div>
+            </section>
+
+            <section class="weather-section">
+                <h2>Weather Conditions</h2>
+                <div id="weather-info" class="info-box">
+                    Loading...
+                </div>
+            </section>
+
+            <section class="marine-section">
+                <h2>Marine Conditions</h2>
+                <div id="marine-info" class="info-box">
+                    Loading...
+                </div>
+            </section>
+            
+            <div class="warning-box">
+                <div class="warning-title">⚠️ Important Safety Information</div>
+                <div class="warning-text">
+                    Tide predictions are astronomical only and do not include weather effects. 
+                    Always check current conditions and forecasts before heading out.
+                </div>
+            </div>
         </div>
-      </section>
 
-      <section class="weather-section">
-        <h2>Weather Conditions</h2>
-        <div id="weather-info" class="info-box">
-          Loading...
-        </div>
-      </section>
+        <footer>
+            <p>Data sources: Tidal harmonic analysis, <a href="https://open-meteo.com" target="_blank">Open-Meteo</a></p>
+            <p class="disclaimer">
+                This application provides predictions for recreational purposes only. Always consult official sources and local knowledge before engaging in water activities.
+            </p>
+        </footer>
+    </div>
 
-      <section class="marine-section">
-        <h2>Marine Conditions</h2>
-        <div id="marine-info" class="info-box">
-          Loading...
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <p>Data sources: Tidal harmonic analysis, <a href="https://open-meteo.com" target="_blank">Open-Meteo</a></p>
-      <p class="disclaimer">
-        ⚠️ Tide predictions are astronomical only and do not include weather effects. 
-        Always check current conditions and forecasts before heading out.
-      </p>
-    </footer>
-  </div>
-
-  <script type="module" src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
