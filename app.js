@@ -6,6 +6,9 @@
 import { loadStations, getCurrentTideInfo, generateTideSeries, findHighLowTides } from './tide-harmonic.js';
 import { fetchWeatherData, fetchMarineData, getCurrentWeather, getCurrentMarine, getWindDirection, calculateFishingScore } from './weather-marine.js';
 
+// Constants
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+
 // Global state
 let stations = null;
 let currentStation = null;
@@ -420,7 +423,7 @@ function startAutoRefresh() {
     if (currentStation) {
       loadStation(currentStation.id);
     }
-  }, 5 * 60 * 1000);
+  }, REFRESH_INTERVAL_MS);
 }
 
 // Start auto-refresh

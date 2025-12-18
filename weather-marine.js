@@ -4,6 +4,14 @@
  * This module provides functions to fetch weather and marine data from Open-Meteo APIs
  */
 
+// Constants for wind direction
+const WIND_DIRECTIONS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+                         'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+const DEGREES_PER_DIRECTION = 360 / WIND_DIRECTIONS.length; // 22.5 degrees
+
+// Forecast duration
+const DEFAULT_FORECAST_HOURS = 168; // 7 days
+
 /**
  * Fetch weather data from Open-Meteo API
  * @param {number} latitude - Latitude in decimal degrees
@@ -163,7 +171,7 @@ export function getCurrentMarine(marineData) {
  * @param {number} hours - Number of hours to forecast (default: 168 for 7 days)
  * @returns {Array} Array of forecast objects
  */
-export function getForecast(weatherData, marineData, hours = 168) {
+export function getForecast(weatherData, marineData, hours = DEFAULT_FORECAST_HOURS) {
   const forecast = [];
   const now = new Date();
   const endTime = new Date(now.getTime() + hours * 60 * 60 * 1000);
@@ -190,11 +198,6 @@ export function getForecast(weatherData, marineData, hours = 168) {
 
   return forecast;
 }
-
-// Constants for wind direction calculation
-const WIND_DIRECTIONS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
-                         'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-const DEGREES_PER_DIRECTION = 360 / WIND_DIRECTIONS.length; // 22.5 degrees
 
 /**
  * Get wind direction as cardinal direction

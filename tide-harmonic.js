@@ -73,7 +73,7 @@ function toRadians(degrees) {
  * @returns {number} Predicted tide height in meters
  */
 export function predictTideHeight(station, date) {
-  const t = dateToHoursSinceEpoch(date);
+  const t = dateToHoursSinceEpoch(date); // Hours since epoch (2000-01-01 00:00:00 UTC)
   const datum = station.datum || 0;
   
   let height = datum;
@@ -90,7 +90,7 @@ export function predictTideHeight(station, date) {
     const phase = constituent.phase;
     
     // h(t) = A * cos(ω*t - φ)
-    // where ω is in degrees/hour, converted to radians
+    // where t is hours since epoch, ω is angular speed in degrees/hour (converted to radians)
     const omega = toRadians(speed);
     const phi = toRadians(phase);
     
