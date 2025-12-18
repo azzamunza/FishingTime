@@ -72,18 +72,35 @@ async function loadStation(stationId) {
     // Get timezone for the location (using Australia/Perth for WA locations)
     const timezone = 'Australia/Perth';
     
-    // Fetch weather and marine data in parallel
-    [weatherData, marineData] = await Promise.all([
-      fetchWeatherData(currentStation.latitude, currentStation.longitude, timezone),
-      fetchMarineData(currentStation.latitude, currentStation.longitude, timezone)
-    ]);
+    // Fetch weather and marine data in parallel (with error handling)
+    try {
+      [weatherData, marineData] = await Promise.all([
+        fetchWeatherData(currentStation.latitude, currentStation.longitude, timezone).catch(err => {
+          console.warn('Weather data unavailable:', err.message);
+          return null;
+        }),
+        fetchMarineData(currentStation.latitude, currentStation.longitude, timezone).catch(err => {
+          console.warn('Marine data unavailable:', err.message);
+          return null;
+        })
+      ]);
+    } catch (error) {
+      console.warn('External data fetch failed:', error.message);
+      weatherData = null;
+      marineData = null;
+    }
     
-    // Update displays
+    // Update displays (tides work independently of external APIs)
     updateTideDisplay();
     updateWeatherDisplay();
     updateMarineDisplay();
     updateFishingScore();
     updateTideChart();
+    
+    // Show warning if external data failed
+    if (!weatherData || !marineData) {
+      showWarning('Note: Weather and marine data unavailable. Showing tide predictions only.');
+    }
     
     showLoading(false);
   } catch (error) {
@@ -136,9 +153,13 @@ function updateTideDisplay() {
  */
 function updateWeatherDisplay() {
   const weather = getCurrentWeather(weatherData);
-  if (!weather) return;
-  
   const weatherEl = document.getElementById('weather-info');
+  
+  if (!weather) {
+    weatherEl.innerHTML = '<div class="info-unavailable">Weather data currently unavailable. Please check back later or ensure you have an internet connection.</div>';
+    return;
+  }
+  
   const windDir = getWindDirection(weather.windDirection);
   
   weatherEl.innerHTML = `
@@ -170,9 +191,13 @@ function updateWeatherDisplay() {
  */
 function updateMarineDisplay() {
   const marine = getCurrentMarine(marineData);
-  if (!marine) return;
-  
   const marineEl = document.getElementById('marine-info');
+  
+  if (!marine) {
+    marineEl.innerHTML = '<div class="info-unavailable">Marine data currently unavailable. Please check back later or ensure you have an internet connection.</div>';
+    return;
+  }
+  
   const waveDir = getWindDirection(marine.waveDirection);
   const swellDir = getWindDirection(marine.swellDirection);
   
@@ -208,10 +233,21 @@ function updateFishingScore() {
   const marine = getCurrentMarine(marineData);
   const tideInfo = getCurrentTideInfo(currentStation);
   
-  const scoreResult = calculateFishingScore(weather, marine, tideInfo);
-  
   const scoreEl = document.getElementById('fishing-score');
   const factorsEl = document.getElementById('score-factors');
+  
+  if (!weather || !marine) {
+    scoreEl.innerHTML = `
+      <div class="score score-unavailable">
+        <div class="score-quality">Score Unavailable</div>
+        <div class="score-note">Weather/marine data needed</div>
+      </div>
+    `;
+    factorsEl.innerHTML = '<p><em>Tide predictions are available below. Full fishing score requires weather and marine data.</em></p>';
+    return;
+  }
+  
+  const scoreResult = calculateFishingScore(weather, marine, tideInfo);
   
   // Color code based on score
   let scoreClass = 'score-poor';
@@ -340,8 +376,21 @@ function showError(message) {
   if (errorEl) {
     errorEl.textContent = message;
     errorEl.style.display = 'block';
+    errorEl.className = 'error-message';
   }
   showLoading(false);
+}
+
+/**
+ * Show warning message
+ */
+function showWarning(message) {
+  const errorEl = document.getElementById('error-message');
+  if (errorEl) {
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    errorEl.className = 'warning-message';
+  }
 }
 
 // Initialize when DOM is ready
