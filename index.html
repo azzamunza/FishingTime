@@ -2388,8 +2388,8 @@
                 }
                 
                 // Calculate minimum radius for clamping
-                const minCurrentRadius = Math.min(...currentLayerPoints.map(p => p.radius));
-                const minNextRadius = Math.min(...nextLayerPoints.map(p => p.radius));
+                const minCurrentRadius = currentLayerPoints.reduce((min, p) => Math.min(min, p.radius), Infinity);
+                const minNextRadius = nextLayerPoints.reduce((min, p) => Math.min(min, p.radius), Infinity);
                 
                 const smoothCurrent = createSmoothPath(currentLayerPoints, 10, minCurrentRadius);
                 const smoothNext = createSmoothPath(nextLayerPoints, 10, minNextRadius);
