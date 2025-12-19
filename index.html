@@ -587,6 +587,57 @@
         .timeline-data-item .icon {
             font-size: 1.1em;
         }
+        
+        /* Fishing suitability score indicators */
+        .suitability-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1em;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .suitability-optimal {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        
+        .suitability-fair {
+            background: #f59e0b;
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+        
+        .suitability-poor {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        
+        .score-display {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .score-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .score-value {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -654,6 +705,13 @@
             <div class="chart-section">
                 <h2 class="viz-title" id="locationTitle">Loading...</h2>
                 <p class="viz-subtitle" id="dateSubtitle">Select a location to view fishing conditions</p>
+                
+                <div class="score-display" id="scoreDisplay" style="display: none;">
+                    <div class="score-title">Average Fishing Suitability</div>
+                    <div class="score-value" id="scoreValue">--</div>
+                    <div class="suitability-indicator" id="suitabilityIndicator">--</div>
+                    <p id="suitabilityDescription" style="margin-top: 10px; color: #666;">--</p>
+                </div>
                 
                 <div class="tab-menu" id="chartTabMenu">
                     <button class="tab-btn active" data-chart="separated">Separated Rings</button>
@@ -855,47 +913,40 @@
         let allDaysData = [];  // Store parsed data for all 7 days
         let searchController;  // For aborting previous search requests
         
-        // Dataset configurations
+        // Dataset configurations with research-based fishing values and weights
         const datasets = {
-            tideHeight: {
-                name: 'Tide Height',
+            pressure: {
+                name: 'Pressure',
                 enabled: true,
-                color: '#1976d2',
-                min: -2,
-                max: 2,
-                idealMin: -0.5,
-                idealMax: 0.5,
-                unit: 'm'
+                color: '#9c27b0',
+                min: 985,
+                max: 1040,
+                idealMin: 1012,
+                idealMax: 1022,
+                unit: 'hPa',
+                weight: 0.40  // 40% weight - most important factor
             },
-            tideMovement: {
-                name: 'Tide Movement',
+            temperature: {
+                name: 'Temperature',
                 enabled: true,
-                color: '#0288d1',
-                min: -1,
-                max: 1,
-                idealMin: 0.2,
-                idealMax: 0.8,
-                unit: 'm/h'
+                color: '#F28C28',
+                min: 8,
+                max: 32,
+                idealMin: 18,
+                idealMax: 24,
+                unit: '°C',
+                weight: 0.20  // 20% weight
             },
             windSpeed: {
                 name: 'Wind Speed',
                 enabled: true,
                 color: '#32dbae',
                 min: 0,
-                max: 30,
-                idealMin: 0,
-                idealMax: 15,
-                unit: 'km/h'
-            },
-            temperature: {
-                name: 'Temperature',
-                enabled: true,
-                color: '#F28C28',
-                min: 10,
-                max: 40,
-                idealMin: 18,
-                idealMax: 28,
-                unit: '°C'
+                max: 25,
+                idealMin: 5,
+                idealMax: 12,
+                unit: 'km/h',
+                weight: 0.20  // 20% weight
             },
             cloudCover: {
                 name: 'Cloud Cover',
@@ -905,27 +956,52 @@
                 max: 100,
                 idealMin: 0,
                 idealMax: 60,
-                unit: '%'
+                unit: '%',
+                weight: 0.10  // 10% weight (part of 20% clouds/rain)
             },
-            pressure: {
-                name: 'Pressure',
+            rain: {
+                name: 'Rain',
                 enabled: true,
-                color: '#9c27b0',
-                min: 990,
-                max: 1030,
-                idealMin: 1010,
-                idealMax: 1020,
-                unit: 'hPa'
+                color: '#60a5fa',
+                min: 0,
+                max: 10,
+                idealMin: 0,
+                idealMax: 2,
+                unit: 'mm',
+                weight: 0.10  // 10% weight (part of 20% clouds/rain)
+            },
+            tideHeight: {
+                name: 'Tide Height',
+                enabled: false,
+                color: '#1976d2',
+                min: -2,
+                max: 2,
+                idealMin: -0.5,
+                idealMax: 0.5,
+                unit: 'm',
+                weight: 0.00  // Optional dataset, not part of core weights
+            },
+            tideMovement: {
+                name: 'Tide Movement',
+                enabled: false,
+                color: '#0288d1',
+                min: -1,
+                max: 1,
+                idealMin: 0.2,
+                idealMax: 0.8,
+                unit: 'm/h',
+                weight: 0.00  // Optional dataset, not part of core weights
             },
             waveHeight: {
                 name: 'Wave Height',
-                enabled: true,
+                enabled: false,
                 color: '#2196f3',
                 min: 0,
                 max: 3,
                 idealMin: 0,
                 idealMax: 1,
-                unit: 'm'
+                unit: 'm',
+                weight: 0.00  // Optional dataset, not part of core weights
             }
         };
         
@@ -1194,6 +1270,39 @@
             });
         }
         
+        function updateScoreDisplay(dayIndex) {
+            if (dayIndex >= allDaysData.length) return;
+            
+            const dayData = allDaysData[dayIndex];
+            let totalScore = 0;
+            let count = 0;
+            
+            // Calculate average score for the day
+            dayData.hours.forEach(hourIndex => {
+                const score = calculateFishingScoreForHour(hourIndex);
+                totalScore += score;
+                count++;
+            });
+            
+            const avgScore = count > 0 ? (totalScore / count) * 100 : 0;
+            const suitability = getFishingSuitability(avgScore);
+            
+            // Update display
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const scoreValue = document.getElementById('scoreValue');
+            const indicator = document.getElementById('suitabilityIndicator');
+            const description = document.getElementById('suitabilityDescription');
+            
+            if (scoreDisplay && scoreValue && indicator && description) {
+                scoreDisplay.style.display = 'block';
+                scoreValue.textContent = Math.round(avgScore);
+                scoreValue.style.color = suitability.color;
+                indicator.textContent = suitability.label;
+                indicator.className = 'suitability-indicator ' + suitability.class;
+                description.textContent = suitability.description;
+            }
+        }
+        
         function updateChart() {
             if (!weatherData || !marineData || allDaysData.length === 0) {
                 return;
@@ -1204,18 +1313,27 @@
             
             if (chartType === 'separated') {
                 drawSeparatedChartForDay(currentDay);
+                updateScoreDisplay(currentDay);
             } else if (chartType === 'overlaid') {
                 drawOverlaidChartForDay(currentDay);
+                updateScoreDisplay(currentDay);
             } else if (chartType === 'stacked') {
                 drawStackedChartForDay(currentDay);
+                updateScoreDisplay(currentDay);
             } else if (chartType === 'hourlyRating') {
                 drawHourlyRatingChartForDay(currentDay);
+                updateScoreDisplay(currentDay);
             } else if (chartType === 'circular') {
                 drawCircularChartForDay(currentDay);
+                updateScoreDisplay(currentDay);
             } else if (chartType === 'rating') {
                 drawRatingChartForDay(currentDay);
+                updateScoreDisplay(currentDay);
             } else if (chartType === 'weekly') {
                 drawWeeklyChart();
+                // Hide score display for weekly view
+                const scoreDisplay = document.getElementById('scoreDisplay');
+                if (scoreDisplay) scoreDisplay.style.display = 'none';
             }
         }
         
@@ -1285,17 +1403,16 @@
                 const x = padding + i * barWidth + barSpacing / 2;
                 const y = height - padding - barHeight;
                 
-                // Gradient for each bar
-                const gradient = ctx.createLinearGradient(x, y, x, height - padding);
-                gradient.addColorStop(0, '#764ba2');
-                gradient.addColorStop(1, '#667eea');
+                // Get color based on fishing suitability
+                const scorePercent = item.score * 100;
+                const suitability = getFishingSuitability(scorePercent);
                 
-                ctx.fillStyle = gradient;
+                ctx.fillStyle = suitability.color;
                 ctx.fillRect(x, y, actualBarWidth, barHeight);
                 
-                // Bar outline
-                ctx.strokeStyle = '#667eea';
-                ctx.lineWidth = 1;
+                // Bar outline - darker shade of the bar color
+                ctx.strokeStyle = suitability.color;
+                ctx.lineWidth = 2;
                 ctx.strokeRect(x, y, actualBarWidth, barHeight);
                 
                 // Hour labels at configured intervals
@@ -1369,16 +1486,15 @@
                 const x = padding + i * barWidth + barSpacing / 2;
                 const y = height - padding - barHeight;
                 
-                // Gradient for each bar
-                const gradient = ctx.createLinearGradient(x, y, x, height - padding);
-                gradient.addColorStop(0, '#764ba2');
-                gradient.addColorStop(1, '#667eea');
+                // Get color based on fishing suitability
+                const scorePercent = item.average * 100;
+                const suitability = getFishingSuitability(scorePercent);
                 
-                ctx.fillStyle = gradient;
+                ctx.fillStyle = suitability.color;
                 ctx.fillRect(x, y, actualBarWidth, barHeight);
                 
                 // Bar outline
-                ctx.strokeStyle = '#667eea';
+                ctx.strokeStyle = suitability.color;
                 ctx.lineWidth = 2;
                 ctx.strokeRect(x, y, actualBarWidth, barHeight);
                 
@@ -1394,8 +1510,8 @@
                 ctx.fillText(dayName, 0, 0);
                 ctx.restore();
                 
-                // Score percentage on top
-                ctx.fillStyle = '#667eea';
+                // Score percentage on top with suitability color
+                ctx.fillStyle = suitability.color;
                 ctx.font = 'bold 14px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(`${Math.round(item.average * 100)}%`, x + actualBarWidth / 2, y - 10);
@@ -1415,8 +1531,8 @@
         }
         
         function calculateFishingScoreForHour(hourIndex) {
-            let totalScore = 0;
-            let enabledCount = 0;
+            let totalWeightedScore = 0;
+            let totalWeight = 0;
             
             // Cache hourly data references
             const weatherHourly = weatherData?.hourly;
@@ -1444,6 +1560,10 @@
                         value = weatherHourly.cloud_cover[hourIndex];
                     } else if (key === 'pressure' && weatherHourly) {
                         value = weatherHourly.pressure_msl[hourIndex];
+                    } else if (key === 'rain' && weatherHourly) {
+                        // Explicitly check for null/undefined to distinguish from actual zero rainfall
+                        const rainValue = weatherHourly.rain[hourIndex];
+                        value = (rainValue !== null && rainValue !== undefined) ? rainValue : 0;
                     } else if (key === 'waveHeight' && marineHourly) {
                         value = marineHourly.wave_height[hourIndex];
                     } else {
@@ -1453,36 +1573,83 @@
                     if (value === null || value === undefined) continue;
                     
                     const score = normalizeScore(value, dataset);
-                    totalScore += score;
-                    enabledCount++;
+                    const weight = dataset.weight || 0;
+                    
+                    totalWeightedScore += score * weight;
+                    totalWeight += weight;
                 } catch (error) {
                     console.error(`Error calculating ${key}:`, error);
                 }
             }
             
-            return enabledCount > 0 ? totalScore / enabledCount : 0;
+            // Return weighted average score, normalized to 0-1 range
+            // If no weighted datasets are enabled, return 0.5 as neutral/unknown score
+            return totalWeight > 0 ? totalWeightedScore / totalWeight : 0.5;
+        }
+        
+        /**
+         * Calculate fishing suitability score using smooth-step cubic hermite interpolation
+         * This creates smooth "ease-in" to ideal fishing ranges with rounded shoulders
+         * 
+         * The smoothstep function S(t) = 3t² - 2t³ is a cubic hermite spline that:
+         * - Has zero derivatives at t=0 and t=1 (smooth transitions)
+         * - Is monotonically increasing from 0 to 1
+         * - Creates aesthetically pleasing, rounded "shoulders" in the score curve
+         * Reference: https://en.wikipedia.org/wiki/Smoothstep
+         * 
+         * @param {number} x - The current value to score
+         * @param {number} rMin - Absolute minimum (returns 0)
+         * @param {number} iMin - Ideal minimum (returns 100)
+         * @param {number} iMax - Ideal maximum (returns 100)
+         * @param {number} rMax - Absolute maximum (returns 0)
+         * @returns {number} Score from 0-100
+         */
+        function calculateFishingScore(x, rMin, iMin, iMax, rMax) {
+            if (x >= iMin && x <= iMax) return 100;
+            if (x <= rMin || x >= rMax) return 0;
+            let t = (x < iMin) ? (x - rMin) / (iMin - rMin) : (rMax - x) / (rMax - iMax);
+            // Smoothstep formula: 3t² - 2t³
+            return Math.max(0, Math.min(100, (3 * t**2 - 2 * t**3) * 100));
+        }
+        
+        /**
+         * Get fishing suitability status based on score
+         * @param {number} score - Score from 0-100
+         * @returns {Object} Status object with label, class, and color
+         */
+        function getFishingSuitability(score) {
+            if (score >= 80) {
+                return { 
+                    label: 'Optimal', 
+                    class: 'suitability-optimal', 
+                    color: '#10b981',
+                    description: 'Excellent fishing conditions!'
+                };
+            } else if (score >= 50) {
+                return { 
+                    label: 'Fair', 
+                    class: 'suitability-fair', 
+                    color: '#f59e0b',
+                    description: 'Good fishing conditions'
+                };
+            } else {
+                return { 
+                    label: 'Poor', 
+                    class: 'suitability-poor', 
+                    color: '#ef4444',
+                    description: 'Challenging fishing conditions'
+                };
+            }
         }
         
         function normalizeScore(value, dataset) {
             const { min, max, idealMin, idealMax } = dataset;
             
-            // Value outside acceptable range
-            if (value < min || value > max) {
-                return 0;
-            }
+            // Use the smooth-step cubic falloff function
+            const score = calculateFishingScore(value, min, idealMin, idealMax, max);
             
-            // Value in ideal range
-            if (value >= idealMin && value <= idealMax) {
-                return 1;
-            }
-            
-            // Value between min and idealMin
-            if (value < idealMin) {
-                return (value - min) / (idealMin - min);
-            }
-            
-            // Value between idealMax and max
-            return 1 - (value - idealMax) / (max - idealMax);
+            // Return normalized 0-1 value for compatibility with existing visualization code
+            return score / 100;
         }
         
         function drawCircularChart(ctx, centerX, centerY, radius, scores) {
@@ -1510,12 +1677,24 @@
                 ctx.arc(centerX, centerY, innerRadius, angle2, angle1, true);
                 ctx.closePath();
                 
-                // Use gradient colors matching the rating chart
-                const r = Math.round(CHART_COLORS.RGB_LOW_R + score * (CHART_COLORS.RGB_HIGH_R - CHART_COLORS.RGB_LOW_R));
-                const g = Math.round(CHART_COLORS.RGB_LOW_G + score * (CHART_COLORS.RGB_HIGH_G - CHART_COLORS.RGB_LOW_G));
-                const b = Math.round(CHART_COLORS.RGB_LOW_B + score * (CHART_COLORS.RGB_HIGH_B - CHART_COLORS.RGB_LOW_B));
-                const alpha = CHART_COLORS.ALPHA_MIN + score * CHART_COLORS.ALPHA_RANGE;
-                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                // Use high-contrast colors based on fishing suitability
+                const scorePercent = score * 100;
+                const suitability = getFishingSuitability(scorePercent);
+                
+                // Apply alpha based on score intensity
+                const alpha = 0.5 + score * 0.5;  // Range from 0.5 to 1.0
+                
+                // Parse hex color to RGB (expecting format #RRGGBB)
+                const hexMatch = suitability.color.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+                if (hexMatch) {
+                    const r = parseInt(hexMatch[1], 16);
+                    const g = parseInt(hexMatch[2], 16);
+                    const b = parseInt(hexMatch[3], 16);
+                    ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                } else {
+                    // Fallback to solid color if parsing fails
+                    ctx.fillStyle = suitability.color;
+                }
                 ctx.fill();
                 
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
