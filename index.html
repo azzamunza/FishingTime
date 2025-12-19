@@ -371,6 +371,83 @@
             color: #c62828;
             text-align: center;
         }
+        
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .data-timeline {
+            margin-top: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .timeline-title {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+        
+        .timeline-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+        
+        .timeline-item {
+            flex: 1;
+            min-width: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 10px 5px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        
+        .timeline-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .timeline-time {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+            width: 100%;
+        }
+        
+        .timeline-data-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin: 4px 0;
+            font-size: 0.85em;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .timeline-data-item .icon {
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
@@ -403,18 +480,106 @@
         
         <div class="day-selector" id="daySelector"></div>
         
+        <div class="controls-row">
+            <button class="day-btn" id="weeklyOverviewBtn">Weekly Overview</button>
+        </div>
+        
         <div class="main-content">
             <div class="chart-section">
                 <h2 class="viz-title" id="locationTitle">Loading...</h2>
                 <p class="viz-subtitle" id="dateSubtitle">Select a location to view fishing conditions</p>
                 
                 <div class="tab-menu" id="chartTabMenu">
-                    <button class="tab-btn active" data-chart="circular">24-Hour Circular</button>
-                    <button class="tab-btn" data-chart="rating">Hourly Rating</button>
-                    <button class="tab-btn" data-chart="weekly">Weekly Overview</button>
+                    <button class="tab-btn active" data-chart="separated">Separated Rings</button>
+                    <button class="tab-btn" data-chart="overlaid">Overlaid</button>
+                    <button class="tab-btn" data-chart="stacked">Stacked</button>
+                    <button class="tab-btn" data-chart="hourlyRating">Hourly Rating</button>
+                    <button class="tab-btn" data-chart="circular">24-Hour Circular</button>
+                    <button class="tab-btn" data-chart="rating">Hourly Rating (Bar)</button>
                 </div>
                 
-                <div class="chart-container active" id="circularChartContainer">
+                <div class="chart-container active" id="separatedChartContainer">
+                    <div class="canvas-container">
+                        <canvas id="separatedCanvas" width="1000" height="600" aria-label="Separated rings chart"></canvas>
+                    </div>
+                    
+                    <div class="data-timeline">
+                        <div class="timeline-title">Hourly Data</div>
+                        <div class="timeline-container" id="timeline1"></div>
+                    </div>
+                    
+                    <div class="legend" id="legend1"></div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">How to Read This Chart</div>
+                        <div class="info-text">
+                            This chart shows each enabled dataset in its own ring. Each ring represents a different metric 
+                            with its own scale. The chart flows clockwise with time, using filled spline areas to show 
+                            the values throughout the day.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container" id="overlaidChartContainer">
+                    <div class="canvas-container">
+                        <canvas id="overlaidCanvas" width="1000" height="600" aria-label="Overlaid chart"></canvas>
+                    </div>
+                    
+                    <div class="data-timeline">
+                        <div class="timeline-title">Hourly Data</div>
+                        <div class="timeline-container" id="timeline2"></div>
+                    </div>
+                    
+                    <div class="legend" id="legend2"></div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">How to Read This Chart</div>
+                        <div class="info-text">
+                            This chart overlays all enabled datasets in the same normalized 0-1 range, making it easy 
+                            to compare different metrics directly. All values are normalized to their ideal ranges.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container" id="stackedChartContainer">
+                    <div class="canvas-container">
+                        <canvas id="stackedCanvas" width="1000" height="600" aria-label="Stacked chart"></canvas>
+                    </div>
+                    
+                    <div class="data-timeline">
+                        <div class="timeline-title">Hourly Data</div>
+                        <div class="timeline-container" id="timeline3"></div>
+                    </div>
+                    
+                    <div class="legend" id="legend3"></div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">How to Read This Chart</div>
+                        <div class="info-text">
+                            This chart stacks all enabled datasets on top of each other with special normalization. 
+                            Each value is divided by the number of datasets, so the maximum stacked height is always 1.0. 
+                            This allows for consistent visualization regardless of how many datasets are enabled.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container" id="hourlyRatingChartContainer">
+                    <div class="canvas-container">
+                        <canvas id="hourlyRatingCanvas" width="1000" height="600" aria-label="Hourly rating chart"></canvas>
+                    </div>
+                    
+                    <div class="legend" id="legend4"></div>
+                    
+                    <div class="info-box">
+                        <div class="info-title">How to Read This Chart</div>
+                        <div class="info-text">
+                            This chart shows the combined fishing rating for each hour, calculated from all enabled 
+                            datasets. The rating uses normalized values and shows the overall fishing conditions throughout the day.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container" id="circularChartContainer">
                     <div class="canvas-container">
                         <canvas id="mainCanvas" width="600" height="600" aria-label="24-hour circular fishing forecast chart showing optimal fishing times throughout the day"></canvas>
                     </div>
@@ -616,7 +781,15 @@
                     const chartType = e.target.getAttribute('data-chart');
                     document.querySelectorAll('.chart-container').forEach(container => container.classList.remove('active'));
                     
-                    if (chartType === 'circular') {
+                    if (chartType === 'separated') {
+                        document.getElementById('separatedChartContainer').classList.add('active');
+                    } else if (chartType === 'overlaid') {
+                        document.getElementById('overlaidChartContainer').classList.add('active');
+                    } else if (chartType === 'stacked') {
+                        document.getElementById('stackedChartContainer').classList.add('active');
+                    } else if (chartType === 'hourlyRating') {
+                        document.getElementById('hourlyRatingChartContainer').classList.add('active');
+                    } else if (chartType === 'circular') {
                         document.getElementById('circularChartContainer').classList.add('active');
                     } else if (chartType === 'rating') {
                         document.getElementById('ratingChartContainer').classList.add('active');
@@ -626,6 +799,25 @@
                     
                     updateChart();
                 }
+            });
+            
+            // Weekly overview button handler
+            document.getElementById('weeklyOverviewBtn').addEventListener('click', () => {
+                // Hide chart tab menu
+                document.getElementById('chartTabMenu').style.display = 'none';
+                
+                // Update active tab button states
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('weeklyOverviewBtn').classList.add('active');
+                
+                // Hide all daily charts, show weekly
+                document.querySelectorAll('.chart-container').forEach(container => container.classList.remove('active'));
+                document.getElementById('weeklyChartContainer').classList.add('active');
+                
+                // Remove active state from day selector buttons
+                document.querySelectorAll('#daySelector .day-btn').forEach(btn => btn.classList.remove('active'));
+                
+                drawWeeklyChart();
             });
         }
         
@@ -799,13 +991,17 @@
                     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     
-                    // Switch to circular or rating chart if on weekly view
+                    // Show chart tab menu if coming from weekly view
+                    document.getElementById('chartTabMenu').style.display = 'flex';
+                    document.getElementById('weeklyOverviewBtn').classList.remove('active');
+                    
+                    // Switch to separated rings chart if on weekly view or no active tab
                     const activeTab = document.querySelector('.tab-btn.active');
-                    if (activeTab && activeTab.getAttribute('data-chart') === 'weekly') {
+                    if (!activeTab || activeTab.getAttribute('data-chart') === 'weekly') {
                         document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-                        document.querySelector('.tab-btn[data-chart="circular"]').classList.add('active');
+                        document.querySelector('.tab-btn[data-chart="separated"]').classList.add('active');
                         document.querySelectorAll('.chart-container').forEach(c => c.classList.remove('active'));
-                        document.getElementById('circularChartContainer').classList.add('active');
+                        document.getElementById('separatedChartContainer').classList.add('active');
                     }
                     
                     updateChart();
@@ -821,9 +1017,17 @@
             }
             
             const activeTab = document.querySelector('.tab-btn.active');
-            const chartType = activeTab ? activeTab.getAttribute('data-chart') : 'circular';
+            const chartType = activeTab ? activeTab.getAttribute('data-chart') : 'separated';
             
-            if (chartType === 'circular') {
+            if (chartType === 'separated') {
+                drawSeparatedChartForDay(currentDay);
+            } else if (chartType === 'overlaid') {
+                drawOverlaidChartForDay(currentDay);
+            } else if (chartType === 'stacked') {
+                drawStackedChartForDay(currentDay);
+            } else if (chartType === 'hourlyRating') {
+                drawHourlyRatingChartForDay(currentDay);
+            } else if (chartType === 'circular') {
                 drawCircularChartForDay(currentDay);
             } else if (chartType === 'rating') {
                 drawRatingChartForDay(currentDay);
@@ -1241,6 +1445,627 @@
             chartSection.insertBefore(errorDiv, chartSection.firstChild);
             
             setTimeout(() => errorDiv.remove(), 5000);
+        }
+        
+        // Helper function to create smooth path from points
+        function createSmoothPath(points, subdivisions) {
+            if (points.length < 2) return points;
+            
+            const smoothPoints = [];
+            for (let i = 0; i < points.length; i++) {
+                const p0 = points[(i - 1 + points.length) % points.length];
+                const p1 = points[i];
+                const p2 = points[(i + 1) % points.length];
+                const p3 = points[(i + 2) % points.length];
+                
+                for (let t = 0; t < subdivisions; t++) {
+                    const u = t / subdivisions;
+                    const uu = u * u;
+                    const uuu = uu * u;
+                    
+                    // Catmull-Rom spline
+                    const angleVal = 
+                        0.5 * (2 * p1.angle +
+                        (-p0.angle + p2.angle) * u +
+                        (2 * p0.angle - 5 * p1.angle + 4 * p2.angle - p3.angle) * uu +
+                        (-p0.angle + 3 * p1.angle - 3 * p2.angle + p3.angle) * uuu);
+                    
+                    const radiusVal = 
+                        0.5 * (2 * p1.radius +
+                        (-p0.radius + p2.radius) * u +
+                        (2 * p0.radius - 5 * p1.radius + 4 * p2.radius - p3.radius) * uu +
+                        (-p0.radius + 3 * p1.radius - 3 * p2.radius + p3.radius) * uuu);
+                    
+                    smoothPoints.push({ angle: angleVal, radius: radiusVal });
+                }
+            }
+            
+            return smoothPoints;
+        }
+        
+        // Helper function to render timeline
+        function renderTimeline(scoresData, timelineId) {
+            const timeline = document.getElementById(timelineId);
+            if (!timeline) return;
+            
+            timeline.innerHTML = '';
+            
+            scoresData.forEach(score => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'timeline-time';
+                timeDiv.textContent = `${score.hour}:00`;
+                item.appendChild(timeDiv);
+                
+                // Show enabled datasets
+                Object.entries(datasets).forEach(([key, dataset]) => {
+                    if (!dataset.enabled) return;
+                    
+                    const dataDiv = document.createElement('div');
+                    dataDiv.className = 'timeline-data-item';
+                    dataDiv.style.color = dataset.color;
+                    
+                    let value = score[key];
+                    if (value !== undefined && value !== null) {
+                        dataDiv.textContent = `${dataset.name}: ${value.toFixed(1)}${dataset.unit}`;
+                        item.appendChild(dataDiv);
+                    }
+                });
+                
+                timeline.appendChild(item);
+            });
+        }
+        
+        // Calculate scores and values for a given day
+        function calculateDayData(dayIndex) {
+            if (dayIndex >= allDaysData.length) return [];
+            
+            const dayData = allDaysData[dayIndex];
+            const scoresData = [];
+            
+            for (let hourOffset = 0; hourOffset < dayData.hours.length; hourOffset++) {
+                const hourIndex = dayData.hours[hourOffset];
+                const hourData = { hour: hourOffset };
+                
+                // Get time for tide calculations
+                const timeString = weatherData?.hourly?.time?.[hourIndex];
+                const time = timeString ? new Date(timeString) : null;
+                
+                // Calculate values for each dataset
+                Object.entries(datasets).forEach(([key, dataset]) => {
+                    let value = null;
+                    
+                    try {
+                        if (key === 'tideHeight' && tideStation && time) {
+                            value = TideHarmonic.predictTideHeight(tideStation, time);
+                        } else if (key === 'tideMovement' && tideStation && time) {
+                            value = TideHarmonic.calculateTideMovement(tideStation, time);
+                        } else if (key === 'windSpeed' && weatherData?.hourly) {
+                            value = weatherData.hourly.wind_speed_10m[hourIndex];
+                        } else if (key === 'temperature' && weatherData?.hourly) {
+                            value = weatherData.hourly.temperature_2m[hourIndex];
+                        } else if (key === 'cloudCover' && weatherData?.hourly) {
+                            value = weatherData.hourly.cloud_cover[hourIndex];
+                        } else if (key === 'pressure' && weatherData?.hourly) {
+                            value = weatherData.hourly.pressure_msl[hourIndex];
+                        } else if (key === 'waveHeight' && marineData?.hourly) {
+                            value = marineData.hourly.wave_height[hourIndex];
+                        }
+                        
+                        if (value !== null && value !== undefined) {
+                            hourData[key] = value;
+                            hourData[key + 'Score'] = normalizeScore(value, dataset);
+                        }
+                    } catch (error) {
+                        console.error(`Error calculating ${key}:`, error);
+                    }
+                });
+                
+                scoresData.push(hourData);
+            }
+            
+            return scoresData;
+        }
+        
+        // Draw separated rings chart
+        function drawSeparatedChartForDay(dayIndex) {
+            const canvas = document.getElementById('separatedCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const container = canvas.parentElement;
+            if (!container) return;
+            const containerWidth = container.clientWidth;
+            const width = containerWidth || 1000;
+            const height = width * 0.6;
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const scoresData = calculateDayData(dayIndex);
+            if (scoresData.length === 0) return;
+            
+            // Calculate layout
+            const sidePadding = 80;
+            const topPadding = 70;
+            const bottomPadding = 20;
+            
+            const cx = width / 2;
+            const cy = height - bottomPadding;
+            
+            const maxRadiusVertical = cy - topPadding;
+            const maxRadiusHorizontal = cx - sidePadding;
+            const maxAllowedRadius = Math.min(maxRadiusVertical, maxRadiusHorizontal);
+            
+            const innerRadius = maxAllowedRadius * 0.25;
+            
+            // Count enabled datasets
+            const enabledDatasets = Object.entries(datasets).filter(([_, ds]) => ds.enabled);
+            const datasetCount = enabledDatasets.length;
+            
+            if (datasetCount === 0) {
+                ctx.clearRect(0, 0, width, height);
+                return;
+            }
+            
+            const layerHeight = (maxAllowedRadius - innerRadius) / datasetCount;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Calculate angles
+            const startAngle = Math.PI;
+            const angleRange = Math.PI;
+            
+            // Draw each dataset as a separate ring
+            enabledDatasets.forEach(([key, dataset], layerIndex) => {
+                const layerInnerRadius = innerRadius + layerIndex * layerHeight;
+                const points = [];
+                const innerPoints = [];
+                
+                for (let i = 0; i < scoresData.length; i++) {
+                    const score = scoresData[i];
+                    const t = i / (scoresData.length - 1);
+                    const angle = startAngle + t * angleRange;
+                    
+                    const scoreValue = score[key + 'Score'] || 0;
+                    const layerThickness = scoreValue * layerHeight;
+                    
+                    points.push({ angle, radius: layerInnerRadius + layerThickness });
+                    innerPoints.push({ angle, radius: layerInnerRadius });
+                }
+                
+                const smoothOuter = createSmoothPath(points, 10);
+                const smoothInner = createSmoothPath(innerPoints, 10);
+                
+                // Draw filled area
+                ctx.fillStyle = dataset.color + '80'; // 50% opacity
+                ctx.beginPath();
+                for (let i = 0; i < smoothOuter.length; i++) {
+                    const x = cx + Math.cos(smoothOuter[i].angle) * smoothOuter[i].radius;
+                    const y = cy + Math.sin(smoothOuter[i].angle) * smoothOuter[i].radius;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                for (let i = smoothInner.length - 1; i >= 0; i--) {
+                    const x = cx + Math.cos(smoothInner[i].angle) * smoothInner[i].radius;
+                    const y = cy + Math.sin(smoothInner[i].angle) * smoothInner[i].radius;
+                    ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw border
+                ctx.strokeStyle = dataset.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+            
+            // Draw time labels
+            for (let i = 0; i < scoresData.length; i++) {
+                if (i % HOUR_LABEL_INTERVAL !== 0) continue;
+                
+                const t = i / (scoresData.length - 1);
+                const angle = startAngle + t * angleRange;
+                
+                const labelDist = maxAllowedRadius + 50;
+                const x = cx + Math.cos(angle) * labelDist;
+                const y = cy + Math.sin(angle) * labelDist;
+                
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${scoresData[i].hour}:00`, x, y);
+            }
+            
+            renderTimeline(scoresData, 'timeline1');
+            updateLegendForChart('legend1');
+            
+            const date = new Date(allDaysData[dayIndex].date + 'T00:00:00');
+            document.getElementById('locationTitle').textContent = currentLocation.name;
+            document.getElementById('dateSubtitle').textContent = `${date.toLocaleDateString()} - Separated Rings`;
+        }
+        
+        // Draw overlaid chart
+        function drawOverlaidChartForDay(dayIndex) {
+            const canvas = document.getElementById('overlaidCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const container = canvas.parentElement;
+            if (!container) return;
+            const containerWidth = container.clientWidth;
+            const width = containerWidth || 1000;
+            const height = width * 0.6;
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const scoresData = calculateDayData(dayIndex);
+            if (scoresData.length === 0) return;
+            
+            // Calculate layout
+            const sidePadding = 80;
+            const topPadding = 70;
+            const bottomPadding = 20;
+            
+            const cx = width / 2;
+            const cy = height - bottomPadding;
+            
+            const maxRadiusVertical = cy - topPadding;
+            const maxRadiusHorizontal = cx - sidePadding;
+            const maxAllowedRadius = Math.min(maxRadiusVertical, maxRadiusHorizontal);
+            
+            const innerRadius = maxAllowedRadius * 0.25;
+            const maxHeight = maxAllowedRadius - innerRadius;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Calculate angles
+            const startAngle = Math.PI;
+            const angleRange = Math.PI;
+            
+            // Draw each dataset overlaid
+            const enabledDatasets = Object.entries(datasets).filter(([_, ds]) => ds.enabled);
+            
+            enabledDatasets.forEach(([key, dataset]) => {
+                const points = [];
+                const innerPoints = [];
+                
+                for (let i = 0; i < scoresData.length; i++) {
+                    const score = scoresData[i];
+                    const t = i / (scoresData.length - 1);
+                    const angle = startAngle + t * angleRange;
+                    
+                    const scoreValue = score[key + 'Score'] || 0;
+                    const layerThickness = scoreValue * maxHeight;
+                    
+                    points.push({ angle, radius: innerRadius + layerThickness });
+                    innerPoints.push({ angle, radius: innerRadius });
+                }
+                
+                const smoothOuter = createSmoothPath(points, 10);
+                const smoothInner = createSmoothPath(innerPoints, 10);
+                
+                // Draw filled area
+                ctx.fillStyle = dataset.color + '80'; // 50% opacity
+                ctx.beginPath();
+                for (let i = 0; i < smoothOuter.length; i++) {
+                    const x = cx + Math.cos(smoothOuter[i].angle) * smoothOuter[i].radius;
+                    const y = cy + Math.sin(smoothOuter[i].angle) * smoothOuter[i].radius;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                for (let i = smoothInner.length - 1; i >= 0; i--) {
+                    const x = cx + Math.cos(smoothInner[i].angle) * smoothInner[i].radius;
+                    const y = cy + Math.sin(smoothInner[i].angle) * smoothInner[i].radius;
+                    ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw border
+                ctx.strokeStyle = dataset.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+            
+            // Draw time labels
+            for (let i = 0; i < scoresData.length; i++) {
+                if (i % HOUR_LABEL_INTERVAL !== 0) continue;
+                
+                const t = i / (scoresData.length - 1);
+                const angle = startAngle + t * angleRange;
+                
+                const labelDist = maxAllowedRadius + 50;
+                const x = cx + Math.cos(angle) * labelDist;
+                const y = cy + Math.sin(angle) * labelDist;
+                
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${scoresData[i].hour}:00`, x, y);
+            }
+            
+            renderTimeline(scoresData, 'timeline2');
+            updateLegendForChart('legend2');
+            
+            const date = new Date(allDaysData[dayIndex].date + 'T00:00:00');
+            document.getElementById('locationTitle').textContent = currentLocation.name;
+            document.getElementById('dateSubtitle').textContent = `${date.toLocaleDateString()} - Overlaid`;
+        }
+        
+        // Draw stacked chart with special normalization
+        function drawStackedChartForDay(dayIndex) {
+            const canvas = document.getElementById('stackedCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const container = canvas.parentElement;
+            if (!container) return;
+            const containerWidth = container.clientWidth;
+            const width = containerWidth || 1000;
+            const height = width * 0.6;
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const scoresData = calculateDayData(dayIndex);
+            if (scoresData.length === 0) return;
+            
+            // Calculate layout
+            const sidePadding = 80;
+            const topPadding = 70;
+            const bottomPadding = 20;
+            
+            const cx = width / 2;
+            const cy = height - bottomPadding;
+            
+            const maxRadiusVertical = cy - topPadding;
+            const maxRadiusHorizontal = cx - sidePadding;
+            const maxAllowedRadius = Math.min(maxRadiusVertical, maxRadiusHorizontal);
+            
+            const innerRadius = maxAllowedRadius * 0.25;
+            const maxHeight = maxAllowedRadius - innerRadius;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Calculate angles
+            const startAngle = Math.PI;
+            const angleRange = Math.PI;
+            
+            // Count enabled datasets for normalization
+            const enabledDatasets = Object.entries(datasets).filter(([_, ds]) => ds.enabled);
+            const datasetCount = enabledDatasets.length;
+            
+            if (datasetCount === 0) return;
+            
+            // Draw stacked datasets with normalization
+            let currentLayerPoints = [];
+            
+            // Initialize base layer (inner circle)
+            for (let i = 0; i < scoresData.length; i++) {
+                const t = i / (scoresData.length - 1);
+                const angle = startAngle + t * angleRange;
+                currentLayerPoints.push({ angle, radius: innerRadius });
+            }
+            
+            enabledDatasets.forEach(([key, dataset]) => {
+                const nextLayerPoints = [];
+                
+                for (let i = 0; i < scoresData.length; i++) {
+                    const score = scoresData[i];
+                    const scoreValue = score[key + 'Score'] || 0;
+                    
+                    // Divide by dataset count for special normalization
+                    const normalizedScore = scoreValue / datasetCount;
+                    const layerThickness = normalizedScore * maxHeight;
+                    
+                    const currentRadius = currentLayerPoints[i].radius;
+                    nextLayerPoints.push({ 
+                        angle: currentLayerPoints[i].angle, 
+                        radius: currentRadius + layerThickness 
+                    });
+                }
+                
+                const smoothCurrent = createSmoothPath(currentLayerPoints, 10);
+                const smoothNext = createSmoothPath(nextLayerPoints, 10);
+                
+                // Draw filled area
+                ctx.fillStyle = dataset.color + '80'; // 50% opacity
+                ctx.beginPath();
+                for (let i = 0; i < smoothNext.length; i++) {
+                    const x = cx + Math.cos(smoothNext[i].angle) * smoothNext[i].radius;
+                    const y = cy + Math.sin(smoothNext[i].angle) * smoothNext[i].radius;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                for (let i = smoothCurrent.length - 1; i >= 0; i--) {
+                    const x = cx + Math.cos(smoothCurrent[i].angle) * smoothCurrent[i].radius;
+                    const y = cy + Math.sin(smoothCurrent[i].angle) * smoothCurrent[i].radius;
+                    ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                
+                // Draw border
+                ctx.strokeStyle = dataset.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Update current layer for next iteration
+                currentLayerPoints = nextLayerPoints;
+            });
+            
+            // Draw time labels
+            for (let i = 0; i < scoresData.length; i++) {
+                if (i % HOUR_LABEL_INTERVAL !== 0) continue;
+                
+                const t = i / (scoresData.length - 1);
+                const angle = startAngle + t * angleRange;
+                
+                const labelDist = maxAllowedRadius + 50;
+                const x = cx + Math.cos(angle) * labelDist;
+                const y = cy + Math.sin(angle) * labelDist;
+                
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${scoresData[i].hour}:00`, x, y);
+            }
+            
+            renderTimeline(scoresData, 'timeline3');
+            updateLegendForChart('legend3');
+            
+            const date = new Date(allDaysData[dayIndex].date + 'T00:00:00');
+            document.getElementById('locationTitle').textContent = currentLocation.name;
+            document.getElementById('dateSubtitle').textContent = `${date.toLocaleDateString()} - Stacked (Normalized by Dataset Count)`;
+        }
+        
+        // Draw hourly rating chart
+        function drawHourlyRatingChartForDay(dayIndex) {
+            const canvas = document.getElementById('hourlyRatingCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const container = canvas.parentElement;
+            if (!container) return;
+            const containerWidth = container.clientWidth;
+            const width = containerWidth || 1000;
+            const height = width * 0.6;
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            const scoresData = calculateDayData(dayIndex);
+            if (scoresData.length === 0) return;
+            
+            // Calculate layout
+            const sidePadding = 80;
+            const topPadding = 70;
+            const bottomPadding = 20;
+            
+            const cx = width / 2;
+            const cy = height - bottomPadding;
+            
+            const maxRadiusVertical = cy - topPadding;
+            const maxRadiusHorizontal = cx - sidePadding;
+            const maxAllowedRadius = Math.min(maxRadiusVertical, maxRadiusHorizontal);
+            
+            const innerRadius = maxAllowedRadius * 0.25;
+            const maxHeight = maxAllowedRadius - innerRadius;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Calculate angles
+            const startAngle = Math.PI;
+            const angleRange = Math.PI;
+            
+            // Calculate combined rating for each hour
+            const ratingPoints = [];
+            const innerPoints = [];
+            
+            for (let i = 0; i < scoresData.length; i++) {
+                const score = scoresData[i];
+                const t = i / (scoresData.length - 1);
+                const angle = startAngle + t * angleRange;
+                
+                // Average all enabled dataset scores
+                let totalScore = 0;
+                let count = 0;
+                
+                Object.entries(datasets).forEach(([key, dataset]) => {
+                    if (!dataset.enabled) return;
+                    const scoreValue = score[key + 'Score'];
+                    if (scoreValue !== undefined && scoreValue !== null) {
+                        totalScore += scoreValue;
+                        count++;
+                    }
+                });
+                
+                const avgScore = count > 0 ? totalScore / count : 0;
+                const layerThickness = avgScore * maxHeight;
+                
+                ratingPoints.push({ angle, radius: innerRadius + layerThickness });
+                innerPoints.push({ angle, radius: innerRadius });
+            }
+            
+            const smoothRating = createSmoothPath(ratingPoints, 10);
+            const smoothInner = createSmoothPath(innerPoints, 10);
+            
+            // Draw filled area with gradient
+            const gradient = ctx.createLinearGradient(0, cy - maxAllowedRadius, 0, cy);
+            gradient.addColorStop(0, 'rgba(118, 75, 162, 0.8)');
+            gradient.addColorStop(1, 'rgba(102, 126, 234, 0.6)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            for (let i = 0; i < smoothRating.length; i++) {
+                const x = cx + Math.cos(smoothRating[i].angle) * smoothRating[i].radius;
+                const y = cy + Math.sin(smoothRating[i].angle) * smoothRating[i].radius;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            for (let i = smoothInner.length - 1; i >= 0; i--) {
+                const x = cx + Math.cos(smoothInner[i].angle) * smoothInner[i].radius;
+                const y = cy + Math.sin(smoothInner[i].angle) * smoothInner[i].radius;
+                ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw border
+            ctx.strokeStyle = 'rgba(102, 126, 234, 1.0)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw time labels
+            for (let i = 0; i < scoresData.length; i++) {
+                if (i % HOUR_LABEL_INTERVAL !== 0) continue;
+                
+                const t = i / (scoresData.length - 1);
+                const angle = startAngle + t * angleRange;
+                
+                const labelDist = maxAllowedRadius + 50;
+                const x = cx + Math.cos(angle) * labelDist;
+                const y = cy + Math.sin(angle) * labelDist;
+                
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${scoresData[i].hour}:00`, x, y);
+            }
+            
+            updateLegendForChart('legend4');
+            
+            const date = new Date(allDaysData[dayIndex].date + 'T00:00:00');
+            document.getElementById('locationTitle').textContent = currentLocation.name;
+            document.getElementById('dateSubtitle').textContent = `${date.toLocaleDateString()} - Hourly Rating`;
+        }
+        
+        // Update legend for specific chart
+        function updateLegendForChart(legendId) {
+            const legendContainer = document.getElementById(legendId);
+            if (!legendContainer) return;
+            
+            legendContainer.innerHTML = '';
+            
+            Object.entries(datasets).forEach(([key, dataset]) => {
+                if (!dataset.enabled) return;
+                
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${dataset.color};"></div>
+                    <span><strong>${dataset.name}</strong></span>
+                `;
+                legendContainer.appendChild(item);
+            });
         }
         
         // Initialize on load
