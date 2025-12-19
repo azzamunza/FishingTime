@@ -1959,7 +1959,7 @@
         }
         
         // Helper function to create smooth path from points
-        function createSmoothPath(points, subdivisions, minRadius = null) {
+        function createSmoothPath(points, subdivisions) {
             if (points.length < 2) return points;
             
             const smoothPoints = [];
@@ -1981,16 +1981,11 @@
                         (2 * p0.angle - 5 * p1.angle + 4 * p2.angle - p3.angle) * uu +
                         (-p0.angle + 3 * p1.angle - 3 * p2.angle + p3.angle) * uuu);
                     
-                    let radiusVal = 
+                    const radiusVal = 
                         0.5 * (2 * p1.radius +
                         (-p0.radius + p2.radius) * u +
                         (2 * p0.radius - 5 * p1.radius + 4 * p2.radius - p3.radius) * uu +
                         (-p0.radius + 3 * p1.radius - 3 * p2.radius + p3.radius) * uuu);
-                    
-                    // Clamp radius to prevent Catmull-Rom overshoot below minimum
-                    if (minRadius !== null) {
-                        radiusVal = Math.max(minRadius, radiusVal);
-                    }
                     
                     smoothPoints.push({ angle: angleVal, radius: radiusVal });
                 }
@@ -2152,8 +2147,8 @@
                     innerPoints.push({ angle, radius: layerInnerRadius });
                 }
                 
-                const smoothOuter = createSmoothPath(points, 10, layerInnerRadius);
-                const smoothInner = createSmoothPath(innerPoints, 10, layerInnerRadius);
+                const smoothOuter = createSmoothPath(points, 10);
+                const smoothInner = createSmoothPath(innerPoints, 10);
                 
                 // Draw filled area
                 ctx.fillStyle = dataset.color + AREA_OPACITY; // 50% opacity
@@ -2262,8 +2257,8 @@
                     innerPoints.push({ angle, radius: innerRadius });
                 }
                 
-                const smoothOuter = createSmoothPath(points, 10, innerRadius);
-                const smoothInner = createSmoothPath(innerPoints, 10, innerRadius);
+                const smoothOuter = createSmoothPath(points, 10);
+                const smoothInner = createSmoothPath(innerPoints, 10);
                 
                 // Draw filled area
                 ctx.fillStyle = dataset.color + AREA_OPACITY; // 50% opacity
@@ -2387,12 +2382,8 @@
                     });
                 }
                 
-                // Calculate minimum radius for clamping
-                const minCurrentRadius = currentLayerPoints.reduce((min, p) => Math.min(min, p.radius), Infinity);
-                const minNextRadius = nextLayerPoints.reduce((min, p) => Math.min(min, p.radius), Infinity);
-                
-                const smoothCurrent = createSmoothPath(currentLayerPoints, 10, minCurrentRadius);
-                const smoothNext = createSmoothPath(nextLayerPoints, 10, minNextRadius);
+                const smoothCurrent = createSmoothPath(currentLayerPoints, 10);
+                const smoothNext = createSmoothPath(nextLayerPoints, 10);
                 
                 // Draw filled area
                 ctx.fillStyle = dataset.color + AREA_OPACITY; // 50% opacity
@@ -2514,8 +2505,8 @@
                 innerPoints.push({ angle, radius: innerRadius });
             }
             
-            const smoothRating = createSmoothPath(ratingPoints, 10, innerRadius);
-            const smoothInner = createSmoothPath(innerPoints, 10, innerRadius);
+            const smoothRating = createSmoothPath(ratingPoints, 10);
+            const smoothInner = createSmoothPath(innerPoints, 10);
             
             // Draw filled area with gradient
             const gradient = ctx.createLinearGradient(0, cy - maxAllowedRadius, 0, cy);
