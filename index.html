@@ -81,11 +81,150 @@
             font-weight: bold;
             transition: all 0.3s;
             margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .search-btn:hover {
             background: #5568d3;
             transform: translateY(-2px);
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .search-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .search-results {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .search-results li {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+        
+        .search-results li:last-child {
+            border-bottom: none;
+        }
+        
+        .search-results li:hover {
+            background: #f5f5f5;
+        }
+        
+        .recent-section {
+            margin-top: 20px;
+        }
+        
+        .recent-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .recent-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .recent-list li {
+            padding: 10px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        
+        .recent-list li:hover {
+            background: #f5f5f5;
+            border-color: #667eea;
+        }
+        
+        .no-results {
+            text-align: center;
+            color: #999;
+            padding: 20px;
         }
         
         .main-content {
@@ -463,6 +602,10 @@
                 <label for="longitude">Longitude</label>
                 <input type="text" id="longitude" value="115.745" />
             </div>
+            <button class="search-btn" id="locationSearchBtn">
+                <span>🔍</span>
+                <span>Location Search</span>
+            </button>
             <div class="control-group">
                 <label for="timezoneSelect">Timezone</label>
                 <select id="timezoneSelect">
@@ -473,9 +616,32 @@
                     <option value="Australia/Brisbane">Australia/Brisbane</option>
                     <option value="Australia/Darwin">Australia/Darwin</option>
                     <option value="Australia/Hobart">Australia/Hobart</option>
+                    <option value="Asia/Singapore">Asia/Singapore</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo</option>
+                    <option value="Europe/London">Europe/London</option>
+                    <option value="Europe/Berlin">Europe/Berlin</option>
+                    <option value="America/New_York">America/New_York</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles</option>
                 </select>
             </div>
-            <button class="search-btn" id="fetchDataBtn">🔍 Get Fishing Conditions</button>
+            <button class="search-btn" id="fetchDataBtn">🎣 Get Fishing Conditions</button>
+        </div>
+        
+        <div class="modal-overlay" id="locationModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Search Location</h2>
+                    <button class="close-btn" id="closeModal">&times;</button>
+                </div>
+                <div class="search-input-container">
+                    <input type="text" id="locationSearchInput" class="search-input" placeholder="Search for a location..." autocomplete="off" />
+                </div>
+                <ul id="searchResults" class="search-results" style="display: none;"></ul>
+                <div class="recent-section">
+                    <h3 class="recent-title">Recent Locations</h3>
+                    <ul id="recentLocations" class="recent-list"></ul>
+                </div>
+            </div>
         </div>
         
         <div class="day-selector" id="daySelector"></div>
@@ -657,6 +823,14 @@
         // Configuration constants
         const FORECAST_DAYS = 7;  // Number of days to fetch from API
         const HOUR_LABEL_INTERVAL = 3;  // Show hour labels every N hours
+        const AREA_OPACITY = '80';  // 50% opacity for filled areas (hex value)
+        
+        // Chart layout constants
+        const CHART_PADDING = {
+            side: 80,
+            top: 70,
+            bottom: 20
+        };
         
         // Color gradient constants for chart visualization
         const CHART_COLORS = {
@@ -679,6 +853,7 @@
         let currentTimezone = 'Australia/Perth';
         let currentDay = 0;  // Currently selected day (0-6)
         let allDaysData = [];  // Store parsed data for all 7 days
+        let searchController;  // For aborting previous search requests
         
         // Dataset configurations
         const datasets = {
@@ -769,6 +944,14 @@
         
         function attachEventListeners() {
             document.getElementById('fetchDataBtn').addEventListener('click', fetchData);
+            document.getElementById('locationSearchBtn').addEventListener('click', openLocationModal);
+            document.getElementById('closeModal').addEventListener('click', closeLocationModal);
+            document.getElementById('locationModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('locationModal')) {
+                    closeLocationModal();
+                }
+            });
+            document.getElementById('locationSearchInput').addEventListener('input', handleLocationSearch);
             
             // Chart tab switching
             document.getElementById('chartTabMenu').addEventListener('click', (e) => {
@@ -1447,6 +1630,155 @@
             setTimeout(() => errorDiv.remove(), 5000);
         }
         
+        // Location search functions
+        function getRecentLocations() {
+            const stored = localStorage.getItem('recentFishingLocations');
+            return stored ? JSON.parse(stored) : [];
+        }
+        
+        function saveRecentLocation(location) {
+            let recent = getRecentLocations();
+            // Remove duplicate if exists (with tolerance for floating-point comparison)
+            recent = recent.filter(loc => {
+                const latDiff = Math.abs(loc.latitude - location.latitude);
+                const lonDiff = Math.abs(loc.longitude - location.longitude);
+                return !(latDiff < 0.0001 && lonDiff < 0.0001);
+            });
+            // Add to front
+            recent.unshift(location);
+            // Keep only last 10
+            recent = recent.slice(0, 10);
+            localStorage.setItem('recentFishingLocations', JSON.stringify(recent));
+            displayRecentLocations();
+        }
+        
+        function displayRecentLocations() {
+            const recentList = document.getElementById('recentLocations');
+            const recent = getRecentLocations();
+            
+            if (recent.length === 0) {
+                recentList.innerHTML = '<li class="no-results">No recent locations</li>';
+                return;
+            }
+            
+            recentList.innerHTML = '';
+            recent.forEach(location => {
+                const li = document.createElement('li');
+                li.textContent = location.name;
+                li.addEventListener('click', () => {
+                    selectLocation(location);
+                });
+                recentList.appendChild(li);
+            });
+        }
+        
+        function selectLocation(location) {
+            document.getElementById('latitude').value = location.latitude;
+            document.getElementById('longitude').value = location.longitude;
+            
+            // Update location name
+            currentLocation.name = location.name || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`;
+            currentLocation.lat = location.latitude;
+            currentLocation.lon = location.longitude;
+            
+            // Update timezone if available
+            if (location.timezone) {
+                const timezoneSelect = document.getElementById('timezoneSelect');
+                // Check if timezone exists in the dropdown
+                let optionExists = false;
+                for (let i = 0; i < timezoneSelect.options.length; i++) {
+                    if (timezoneSelect.options[i].value === location.timezone) {
+                        timezoneSelect.value = location.timezone;
+                        currentTimezone = location.timezone;
+                        optionExists = true;
+                        break;
+                    }
+                }
+                
+                // If timezone doesn't exist, add it
+                if (!optionExists) {
+                    const option = document.createElement('option');
+                    option.value = location.timezone;
+                    option.textContent = location.timezone;
+                    timezoneSelect.appendChild(option);
+                    timezoneSelect.value = location.timezone;
+                    currentTimezone = location.timezone;
+                }
+            }
+            
+            closeLocationModal();
+            saveRecentLocation(location);
+            
+            // Automatically fetch data for the new location
+            fetchData();
+        }
+        
+        function openLocationModal() {
+            document.getElementById('locationModal').classList.add('active');
+            displayRecentLocations();
+            document.getElementById('locationSearchInput').value = '';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+        
+        function closeLocationModal() {
+            document.getElementById('locationModal').classList.remove('active');
+        }
+        
+        function handleLocationSearch(e) {
+            const query = e.target.value.trim();
+            const searchResults = document.getElementById('searchResults');
+            
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+            
+            if (query.length < 3) return;
+            
+            // Cancel previous request if still running
+            if (searchController) searchController.abort();
+            searchController = new AbortController();
+            
+            const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5`;
+            
+            fetch(url, { signal: searchController.signal })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch location data');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.results || data.results.length === 0) {
+                        searchResults.innerHTML = '<li class="no-results">No locations found</li>';
+                        searchResults.style.display = 'block';
+                        return;
+                    }
+                    
+                    searchResults.style.display = 'block';
+                    data.results.forEach(place => {
+                        const li = document.createElement('li');
+                        const locationName = `${place.name}, ${place.admin1 || ''} ${place.country}`;
+                        li.textContent = locationName;
+                        
+                        li.addEventListener('click', () => {
+                            selectLocation({
+                                name: locationName,
+                                latitude: place.latitude,
+                                longitude: place.longitude,
+                                timezone: place.timezone
+                            });
+                            document.getElementById('locationSearchInput').value = '';
+                            searchResults.innerHTML = '';
+                            searchResults.style.display = 'none';
+                        });
+                        
+                        searchResults.appendChild(li);
+                    });
+                })
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        console.error('Location search error:', err);
+                    }
+                });
+        }
+        
         // Helper function to create smooth path from points
         function createSmoothPath(points, subdivisions) {
             if (points.length < 2) return points;
@@ -1588,9 +1920,9 @@
             if (scoresData.length === 0) return;
             
             // Calculate layout
-            const sidePadding = 80;
-            const topPadding = 70;
-            const bottomPadding = 20;
+            const sidePadding = CHART_PADDING.side;
+            const topPadding = CHART_PADDING.top;
+            const bottomPadding = CHART_PADDING.bottom;
             
             const cx = width / 2;
             const cy = height - bottomPadding;
@@ -1640,7 +1972,7 @@
                 const smoothInner = createSmoothPath(innerPoints, 10);
                 
                 // Draw filled area
-                ctx.fillStyle = dataset.color + '80'; // 50% opacity
+                ctx.fillStyle = dataset.color + AREA_OPACITY; // 50% opacity
                 ctx.beginPath();
                 for (let i = 0; i < smoothOuter.length; i++) {
                     const x = cx + Math.cos(smoothOuter[i].angle) * smoothOuter[i].radius;
@@ -1750,7 +2082,7 @@
                 const smoothInner = createSmoothPath(innerPoints, 10);
                 
                 // Draw filled area
-                ctx.fillStyle = dataset.color + '80'; // 50% opacity
+                ctx.fillStyle = dataset.color + AREA_OPACITY; // 50% opacity
                 ctx.beginPath();
                 for (let i = 0; i < smoothOuter.length; i++) {
                     const x = cx + Math.cos(smoothOuter[i].angle) * smoothOuter[i].radius;
@@ -1875,7 +2207,7 @@
                 const smoothNext = createSmoothPath(nextLayerPoints, 10);
                 
                 // Draw filled area
-                ctx.fillStyle = dataset.color + '80'; // 50% opacity
+                ctx.fillStyle = dataset.color + AREA_OPACITY; // 50% opacity
                 ctx.beginPath();
                 for (let i = 0; i < smoothNext.length; i++) {
                     const x = cx + Math.cos(smoothNext[i].angle) * smoothNext[i].radius;
