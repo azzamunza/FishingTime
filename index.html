@@ -1553,11 +1553,15 @@
                     } else if (key === 'tideMovement' && tideStation && time) {
                         value = TideHarmonic.calculateTideMovement(tideStation, time);
                     } else if (key === 'windSpeed' && weatherHourly) {
-                        value = weatherHourly.wind_speed_10m[hourIndex];
+                        // Explicitly check for null/undefined to distinguish from actual zero wind speed
+                        const windSpeedValue = weatherHourly.wind_speed_10m[hourIndex];
+                        value = (windSpeedValue !== null && windSpeedValue !== undefined) ? windSpeedValue : 0;
                     } else if (key === 'temperature' && weatherHourly) {
                         value = weatherHourly.temperature_2m[hourIndex];
                     } else if (key === 'cloudCover' && weatherHourly) {
-                        value = weatherHourly.cloud_cover[hourIndex];
+                        // Explicitly check for null/undefined to distinguish from actual zero cloud cover
+                        const cloudCoverValue = weatherHourly.cloud_cover[hourIndex];
+                        value = (cloudCoverValue !== null && cloudCoverValue !== undefined) ? cloudCoverValue : 0;
                     } else if (key === 'pressure' && weatherHourly) {
                         value = weatherHourly.pressure_msl[hourIndex];
                     } else if (key === 'rain' && weatherHourly) {
@@ -1565,7 +1569,9 @@
                         const rainValue = weatherHourly.rain[hourIndex];
                         value = (rainValue !== null && rainValue !== undefined) ? rainValue : 0;
                     } else if (key === 'waveHeight' && marineHourly) {
-                        value = marineHourly.wave_height[hourIndex];
+                        // Explicitly check for null/undefined to distinguish from actual zero wave height
+                        const waveHeightValue = marineHourly.wave_height[hourIndex];
+                        value = (waveHeightValue !== null && waveHeightValue !== undefined) ? waveHeightValue : 0;
                     } else {
                         continue;
                     }
@@ -2054,15 +2060,25 @@
                         } else if (key === 'tideMovement' && tideStation && time) {
                             value = TideHarmonic.calculateTideMovement(tideStation, time);
                         } else if (key === 'windSpeed' && weatherData?.hourly) {
-                            value = weatherData.hourly.wind_speed_10m[hourIndex];
+                            // Explicitly check for null/undefined to distinguish from actual zero wind speed
+                            const windSpeedValue = weatherData.hourly.wind_speed_10m[hourIndex];
+                            value = (windSpeedValue !== null && windSpeedValue !== undefined) ? windSpeedValue : 0;
                         } else if (key === 'temperature' && weatherData?.hourly) {
                             value = weatherData.hourly.temperature_2m[hourIndex];
                         } else if (key === 'cloudCover' && weatherData?.hourly) {
-                            value = weatherData.hourly.cloud_cover[hourIndex];
+                            // Explicitly check for null/undefined to distinguish from actual zero cloud cover
+                            const cloudCoverValue = weatherData.hourly.cloud_cover[hourIndex];
+                            value = (cloudCoverValue !== null && cloudCoverValue !== undefined) ? cloudCoverValue : 0;
                         } else if (key === 'pressure' && weatherData?.hourly) {
                             value = weatherData.hourly.pressure_msl[hourIndex];
+                        } else if (key === 'rain' && weatherData?.hourly) {
+                            // Explicitly check for null/undefined to distinguish from actual zero rainfall
+                            const rainValue = weatherData.hourly.rain[hourIndex];
+                            value = (rainValue !== null && rainValue !== undefined) ? rainValue : 0;
                         } else if (key === 'waveHeight' && marineData?.hourly) {
-                            value = marineData.hourly.wave_height[hourIndex];
+                            // Explicitly check for null/undefined to distinguish from actual zero wave height
+                            const waveHeightValue = marineData.hourly.wave_height[hourIndex];
+                            value = (waveHeightValue !== null && waveHeightValue !== undefined) ? waveHeightValue : 0;
                         }
                         
                         if (value !== null && value !== undefined) {
