@@ -1561,7 +1561,9 @@
                     } else if (key === 'pressure' && weatherHourly) {
                         value = weatherHourly.pressure_msl[hourIndex];
                     } else if (key === 'rain' && weatherHourly) {
-                        value = weatherHourly.rain[hourIndex] || 0;
+                        // Explicitly check for null/undefined to distinguish from actual zero rainfall
+                        const rainValue = weatherHourly.rain[hourIndex];
+                        value = (rainValue !== null && rainValue !== undefined) ? rainValue : 0;
                     } else if (key === 'waveHeight' && marineHourly) {
                         value = marineHourly.wave_height[hourIndex];
                     } else {
@@ -1581,12 +1583,20 @@
             }
             
             // Return weighted average score, normalized to 0-1 range
-            return totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
+            // If no weighted datasets are enabled, return 0.5 as neutral/unknown score
+            return totalWeight > 0 ? totalWeightedScore / totalWeight : 0.5;
         }
         
         /**
          * Calculate fishing suitability score using smooth-step cubic hermite interpolation
          * This creates smooth "ease-in" to ideal fishing ranges with rounded shoulders
+         * 
+         * The smoothstep function S(t) = 3t² - 2t³ is a cubic hermite spline that:
+         * - Has zero derivatives at t=0 and t=1 (smooth transitions)
+         * - Is monotonically increasing from 0 to 1
+         * - Creates aesthetically pleasing, rounded "shoulders" in the score curve
+         * Reference: https://en.wikipedia.org/wiki/Smoothstep
+         * 
          * @param {number} x - The current value to score
          * @param {number} rMin - Absolute minimum (returns 0)
          * @param {number} iMin - Ideal minimum (returns 100)
@@ -1598,6 +1608,7 @@
             if (x >= iMin && x <= iMax) return 100;
             if (x <= rMin || x >= rMax) return 0;
             let t = (x < iMin) ? (x - rMin) / (iMin - rMin) : (rMax - x) / (rMax - iMax);
+            // Smoothstep formula: 3t² - 2t³
             return Math.max(0, Math.min(100, (3 * t**2 - 2 * t**3) * 100));
         }
         
@@ -1672,13 +1683,16 @@
                 
                 // Apply alpha based on score intensity
                 const alpha = 0.5 + score * 0.5;  // Range from 0.5 to 1.0
-                const rgb = suitability.color.match(/\w\w/g);
-                if (rgb) {
-                    const r = parseInt(rgb[0], 16);
-                    const g = parseInt(rgb[1], 16);
-                    const b = parseInt(rgb[2], 16);
+                
+                // Parse hex color to RGB (expecting format #RRGGBB)
+                const hexMatch = suitability.color.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+                if (hexMatch) {
+                    const r = parseInt(hexMatch[1], 16);
+                    const g = parseInt(hexMatch[2], 16);
+                    const b = parseInt(hexMatch[3], 16);
                     ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
                 } else {
+                    // Fallback to solid color if parsing fails
                     ctx.fillStyle = suitability.color;
                 }
                 ctx.fill();
