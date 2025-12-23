@@ -1,1 +1,548 @@
- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perth Fishing Spots Map</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .map-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            text-align: center;
+        }
+        
+        .info-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .info-text {
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        
+        /* Leaflet popup styling */
+        .leaflet-popup-content {
+            margin: 15px;
+            min-width: 350px;
+            max-width: 600px;
+        }
+        
+        .popup-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .fish-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.85em;
+        }
+        
+        .fish-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .fish-table td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+        
+        .fish-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .fish-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .fish-table tr:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .fish-name {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        
+        .legend-icon {
+            width: 25px;
+            height: 40px;
+            background: url('data:image/svg+xml;charset=UTF-8,<svg width="25" height="40" viewBox="0 0 25 40" xmlns="http://www.w3.org/2000/svg"><path d="M12.5 0 L25 40 L12.5 35 L0 40 Z" fill="%23667eea" stroke="%23ffffff" stroke-width="2"/></svg>') center center no-repeat;
+            background-size: contain;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            #map {
+                height: 400px;
+            }
+            
+            .leaflet-popup-content {
+                min-width: 250px;
+                max-width: 300px;
+            }
+            
+            .fish-table {
+                font-size: 0.75em;
+            }
+            
+            .fish-table th,
+            .fish-table td {
+                padding: 6px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎣 Perth Fishing Spots Map</h1>
+        
+        <div class="map-section">
+            <div id="map"></div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-icon"></div>
+                    <span><strong>Fishing Spot Marker</strong> - Click for fish species and details</span>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <div class="info-title">About This Map</div>
+                <div class="info-text">
+                    This interactive map shows popular fishing spots around Perth, Western Australia. 
+                    Click on any marker to view detailed information about fish species found at that location, 
+                    including best fishing times, tide conditions, lunar cycles, recommended rigs, baits, and tactics.
+                    Data includes spots along the Swan River, Canning River, and Perth Coast.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    
+    <script>
+        // Initialize the map centered on Perth, Western Australia
+        const map = L.map('map').setView([-31.9505, 115.8605], 10);
+        
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Custom marker icon
+        const fishingIcon = L.icon({
+            iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 0 L30 45 L15 40 L0 45 Z" fill="#667eea" stroke="#ffffff" stroke-width="2"/>
+                    <text x="15" y="25" font-size="18" text-anchor="middle" fill="white">🎣</text>
+                </svg>
+            `),
+            iconSize: [30, 45],
+            iconAnchor: [15, 45],
+            popupAnchor: [0, -45]
+        });
+        
+        // Fish data structure
+        const commonFish = {
+            blackBream: {
+                name: 'Black Bream',
+                time: 'Early morn/dusk',
+                tide: 'Incoming',
+                lunar: '-',
+                rig: '1-3kg spin, 6lb line',
+                info: 'Common structure dweller',
+                bait: 'River prawns, worms',
+                tactics: 'Work snags &amp; drop-offs'
+            },
+            tailor: {
+                name: 'Tailor',
+                time: 'Dawn/Dusk',
+                tide: 'Incoming',
+                lunar: 'New/Full moon',
+                rig: '8-10ft rod, wire trace',
+                info: 'Aggressive surface feeder',
+                bait: 'Pilchards, metal slugs',
+                tactics: 'Cast across sandbars'
+            },
+            mulloway: {
+                name: 'Mulloway',
+                time: 'Night',
+                tide: 'High/Changing',
+                lunar: 'Full/New moon',
+                rig: '15-20lb gear',
+                info: 'Large predator',
+                bait: 'Live mullet',
+                tactics: 'Deep channels, bridges'
+            },
+            flathead: {
+                name: 'Flathead',
+                time: 'Day/Dusk',
+                tide: 'Outgoing',
+                lunar: '-',
+                rig: 'Light spin',
+                info: 'Bottom dweller',
+                bait: 'Soft plastics, prawns',
+                tactics: 'Drift sandy drop-offs'
+            },
+            herring: {
+                name: 'Herring',
+                time: 'All day',
+                tide: 'High',
+                lunar: '-',
+                rig: 'Light spin, float',
+                info: 'Schooling fish',
+                bait: 'Maggots, prawn pieces',
+                tactics: 'Burley up, small hooks'
+            },
+            pinkSnapper: {
+                name: 'Pink Snapper',
+                time: 'Dawn/Dusk/Night',
+                tide: 'High (Dusk)',
+                lunar: 'Full/New moon',
+                rig: 'Surf rod 10-12ft, 30lb braid',
+                info: 'Prize catch, limit applies',
+                bait: 'Fresh herring fillets, squid',
+                tactics: 'Cast into reef/deep channels'
+            },
+            whiting: {
+                name: 'Whiting',
+                time: 'Morning',
+                tide: 'Incoming',
+                lunar: '-',
+                rig: 'Light spin',
+                info: 'Sand lover',
+                bait: 'Worms, prawns',
+                tactics: 'Fish sandy patches'
+            },
+            baldchinGroper: {
+                name: 'Baldchin Groper',
+                time: 'Day',
+                tide: 'High',
+                lunar: '-',
+                rig: 'Heavy surf gear',
+                info: 'Reef fish',
+                bait: 'Crab, octopus',
+                tactics: 'Fish near reef structure'
+            }
+        };
+        
+        // Fishing spots data with coordinates and fish species
+        const fishingSpots = [
+            // Swan River Region
+            {
+                name: 'Ascot (Swan River)',
+                lat: -31.9371,
+                lng: 115.9279,
+                region: 'Swan River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.tailor,
+                    commonFish.mulloway,
+                    commonFish.flathead
+                ]
+            },
+            {
+                name: 'Bayswater (Swan River)',
+                lat: -31.9178,
+                lng: 115.9098,
+                region: 'Swan River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.tailor,
+                    commonFish.mulloway,
+                    commonFish.flathead
+                ]
+            },
+            {
+                name: 'East Fremantle (Swan River)',
+                lat: -32.0397,
+                lng: 115.7677,
+                region: 'Swan River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.tailor,
+                    commonFish.mulloway,
+                    commonFish.flathead
+                ]
+            },
+            {
+                name: 'Point Walter (Swan River)',
+                lat: -32.0108,
+                lng: 115.7989,
+                region: 'Swan River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.tailor,
+                    commonFish.mulloway,
+                    commonFish.flathead
+                ]
+            },
+            {
+                name: 'Claremont Jetty (Swan River)',
+                lat: -31.9843,
+                lng: 115.7782,
+                region: 'Swan River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.tailor,
+                    commonFish.mulloway,
+                    commonFish.flathead
+                ]
+            },
+            
+            // Canning River Region
+            {
+                name: 'Shelley Foreshore (Canning River)',
+                lat: -32.0298,
+                lng: 115.8568,
+                region: 'Canning River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.flathead,
+                    commonFish.herring
+                ]
+            },
+            {
+                name: 'Riverton Bridge (Canning River)',
+                lat: -32.0324,
+                lng: 115.8945,
+                region: 'Canning River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.flathead,
+                    commonFish.herring
+                ]
+            },
+            {
+                name: 'Deep Water Point (Canning River)',
+                lat: -32.0197,
+                lng: 115.8712,
+                region: 'Canning River',
+                fish: [
+                    commonFish.blackBream,
+                    commonFish.flathead,
+                    commonFish.herring
+                ]
+            },
+            
+            // Perth Coast Region
+            {
+                name: 'Cottesloe Groyne',
+                lat: -31.9959,
+                lng: 115.7557,
+                region: 'Perth Coast',
+                fish: [
+                    commonFish.pinkSnapper,
+                    {...commonFish.tailor, rig: '10-12ft surf rod, wire trace'}, // Larger gear for coast
+                    commonFish.herring,
+                    commonFish.whiting,
+                    commonFish.baldchinGroper
+                ]
+            },
+            {
+                name: 'North Mole (Fremantle)',
+                lat: -32.0545,
+                lng: 115.7373,
+                region: 'Perth Coast',
+                fish: [
+                    commonFish.pinkSnapper,
+                    {...commonFish.tailor, rig: '10-12ft surf rod, wire trace'},
+                    commonFish.herring,
+                    commonFish.whiting,
+                    commonFish.baldchinGroper
+                ]
+            },
+            {
+                name: 'Trigg Beach',
+                lat: -31.8675,
+                lng: 115.7554,
+                region: 'Perth Coast',
+                fish: [
+                    commonFish.pinkSnapper,
+                    {...commonFish.tailor, rig: '10-12ft surf rod, wire trace'},
+                    commonFish.herring,
+                    commonFish.whiting,
+                    commonFish.baldchinGroper
+                ]
+            },
+            {
+                name: 'Hillarys Boat Harbour',
+                lat: -31.8239,
+                lng: 115.7402,
+                region: 'Perth Coast',
+                fish: [
+                    commonFish.pinkSnapper,
+                    {...commonFish.tailor, rig: '10-12ft surf rod, wire trace'},
+                    commonFish.herring,
+                    commonFish.whiting,
+                    commonFish.baldchinGroper
+                ]
+            },
+            {
+                name: 'Woodman Point',
+                lat: -32.1244,
+                lng: 115.7520,
+                region: 'Perth Coast',
+                fish: [
+                    commonFish.pinkSnapper,
+                    {...commonFish.tailor, rig: '10-12ft surf rod, wire trace'},
+                    commonFish.herring,
+                    commonFish.whiting,
+                    commonFish.baldchinGroper
+                ]
+            }
+        ];
+        
+        // Function to generate popup content with HTML table
+        function createPopupContent(spot) {
+            let tableRows = '';
+            
+            spot.fish.forEach(fish => {
+                tableRows += `
+                    <tr>
+                        <td class="fish-name">${fish.name}</td>
+                        <td>${fish.time}</td>
+                        <td>${fish.tide}</td>
+                        <td>${fish.lunar}</td>
+                        <td>${fish.rig}</td>
+                        <td>${fish.info}</td>
+                        <td>${fish.bait}</td>
+                        <td>${fish.tactics}</td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <div class="popup-title">${spot.name}</div>
+                <div style="text-align: center; margin-bottom: 10px; color: #666; font-style: italic;">
+                    ${spot.region}
+                </div>
+                <table class="fish-table">
+                    <thead>
+                        <tr>
+                            <th>Fish Name</th>
+                            <th>Best Time</th>
+                            <th>Best Tide</th>
+                            <th>Lunar Cycle</th>
+                            <th>Rig/Rod Setup</th>
+                            <th>Fish Info/Description</th>
+                            <th>Best Bait</th>
+                            <th>Tactics</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // Add markers for each fishing spot
+        fishingSpots.forEach(spot => {
+            const marker = L.marker([spot.lat, spot.lng], { icon: fishingIcon })
+                .addTo(map)
+                .bindPopup(createPopupContent(spot), {
+                    maxWidth: 700,
+                    className: 'fishing-popup'
+                });
+            
+            // Add tooltip on hover
+            marker.bindTooltip(spot.name, {
+                permanent: false,
+                direction: 'top',
+                className: 'fishing-tooltip'
+            });
+        });
+        
+        // Add scale to the map
+        L.control.scale({ imperial: false, metric: true }).addTo(map);
+    </script>
+</body>
+</html>
