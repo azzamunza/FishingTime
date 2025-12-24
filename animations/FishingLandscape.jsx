@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+// Use React globals loaded via CDN (avoids require() which is not available in browser)
+const { useState, useEffect, useMemo, useRef } = React;
 
 // --- Helper Functions ---
 
