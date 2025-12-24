@@ -323,13 +323,8 @@
                 <div id="map"></div>
             </div>
             
-            <div class="fish-table-section">
-                <div class="banner-container">
-                    <div id="landscape-banner"></div>
-                </div>
-                <div class="fish-list-container" id="fish-list">
-                    <!-- Fish species list will be populated here -->
-                </div>
+            <div class="fish-table-section" id="fish-table-section">
+                <!-- React will render both banner and list here -->
             </div>
         </div>
     </div>
@@ -364,7 +359,7 @@
         const { useState, useEffect, useRef } = React;
         
         // Main App Component
-        function FishingMapApp() {
+        function FishingMapApp({ onLocationUpdate }) {
             const [selectedLocation, setSelectedLocation] = useState(null);
             const [landscapeData, setLandscapeData] = useState({
                 time: 14,
@@ -393,6 +388,13 @@
                     window.TideModule.loadStations('./stations.json').catch(console.error);
                 }
             }, []);
+            
+            // Expose state updater to external code
+            useEffect(() => {
+                if (onLocationUpdate) {
+                    onLocationUpdate(setSelectedLocation);
+                }
+            }, [onLocationUpdate]);
             
             // Update landscape when location changes
             useEffect(() => {
@@ -457,12 +459,23 @@
             
             return (
                 <>
-                    <FishListDisplay 
-                        species={filteredSpecies}
-                        expandedSpecies={expandedSpecies}
-                        toggleSpecies={toggleSpecies}
-                        selectedLocation={selectedLocation}
-                    />
+                    <div className="banner-container">
+                        {window.Landscape && (
+                            <window.Landscape 
+                                data={landscapeData}
+                                tideStats={tideStats}
+                                landscapeType={landscapeType}
+                            />
+                        )}
+                    </div>
+                    <div className="fish-list-container">
+                        <FishListDisplay 
+                            species={filteredSpecies}
+                            expandedSpecies={expandedSpecies}
+                            toggleSpecies={toggleSpecies}
+                            selectedLocation={selectedLocation}
+                        />
+                    </div>
                 </>
             );
         }
@@ -618,42 +631,18 @@
         });
         
         // Render React app
-        const fishListRoot = ReactDOM.createRoot(document.getElementById('fish-list'));
-        const landscapeBannerRoot = ReactDOM.createRoot(document.getElementById('landscape-banner'));
+        const appRoot = ReactDOM.createRoot(document.getElementById('fish-table-section'));
         
-        let currentAppState = {
-            selectedLocation: null,
-            landscapeData: {
-                time: 14,
-                tide: 50,
-                windSpeed: 15,
-                windDir: 90,
-                rain: 0,
-                clouds: 20,
-                moonPhase: 0.25
-            },
-            tideStats: {
-                status: 'Mid',
-                arrow: '-',
-                color: 'white',
-                flow: 0
-            },
-            landscapeType: 'beach'
-        };
+        let setSelectedLocationFromMap = null;
         
-        function updateApp() {
-            fishListRoot.render(<FishingMapApp />);
-            
-            // Render landscape banner
-            if (window.Landscape) {
-                landscapeBannerRoot.render(
-                    <window.Landscape 
-                        data={currentAppState.landscapeData}
-                        tideStats={currentAppState.tideStats}
-                        landscapeType={currentAppState.landscapeType}
-                    />
-                );
-            }
+        function renderApp() {
+            appRoot.render(
+                <FishingMapApp 
+                    onLocationUpdate={(setter) => {
+                        setSelectedLocationFromMap = setter;
+                    }}
+                />
+            );
         }
         
         // Add markers for each fishing spot
@@ -661,46 +650,9 @@
             const marker = L.marker([spot.lat, spot.lng], { icon: fishingIcon })
                 .addTo(map);
             
-            marker.on('click', async () => {
-                currentAppState.selectedLocation = spot;
-                updateApp();
-                
-                // Fetch and update data for this location
-                try {
-                    const weatherData = await window.getWeatherData(spot.lat, spot.lng);
-                    const marineData = await window.getMarineData(spot.lat, spot.lng);
-                    
-                    let tideData = { heightPercent: 50, movement: 0 };
-                    if (window.TideModule && spot.stationId) {
-                        const station = window.TideModule.findStation(spot.stationId);
-                        if (station) {
-                            const now = new Date();
-                            const height = window.TideModule.predictTideHeight(station, now);
-                            const movement = window.TideModule.calculateTideMovement(station, now);
-                            
-                            const minHeight = -0.5;
-                            const maxHeight = 1.5;
-                            const heightPercent = ((height - minHeight) / (maxHeight - minHeight)) * 100;
-                            
-                            tideData = {
-                                heightPercent: Math.max(0, Math.min(100, heightPercent)),
-                                movement: movement
-                            };
-                            
-                            const tideInfo = window.getTideStateInfo(movement);
-                            currentAppState.tideStats = {
-                                status: heightPercent > 80 ? 'High' : heightPercent < 20 ? 'Low' : 'Mid',
-                                ...tideInfo
-                            };
-                        }
-                    }
-                    
-                    currentAppState.landscapeData = window.calculateLandscapeData(weatherData, marineData, tideData);
-                    currentAppState.landscapeType = window.getLandscapeType(spot.locationType);
-                    
-                    updateApp();
-                } catch (error) {
-                    console.error('Error updating location:', error);
+            marker.on('click', () => {
+                if (setSelectedLocationFromMap) {
+                    setSelectedLocationFromMap(spot);
                 }
             });
             
@@ -713,7 +665,7 @@
         L.control.scale({ imperial: false, metric: true }).addTo(map);
         
         // Initial render
-        updateApp();
+        renderApp();
     </script>
 </body>
 </html>
