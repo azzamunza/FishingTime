@@ -12,7 +12,7 @@ const seededRandom = (seed) => {
 
 const SkyGradient = ({ timeOfDay, cloudCover, isStormy }) => {
   const getSkyColors = () => {
-    if (isStormy) return ['#2c3e50', '#34495e', '#2c3e50']; 
+    if (isStormy) return ['#2c3e50', '#34495e', '#2c5e50']; 
     if (timeOfDay < 5 || timeOfDay > 20) return ['#0f2027', '#203a43', '#2c5364']; 
     if (timeOfDay >= 5 && timeOfDay < 8) return ['#ff9966', '#ff5e62', '#2c3e50']; 
     if (timeOfDay >= 17 && timeOfDay <= 20) return ['#f12711', '#f5af19', '#2c3e50']; 
@@ -34,9 +34,9 @@ const SkyGradient = ({ timeOfDay, cloudCover, isStormy }) => {
 const Moon = ({ phase, timeOfDay, cloudCover }) => {
   const opacity = (timeOfDay > 6 && timeOfDay < 18) ? 0.2 : 1;
   const cloudOpacityMod = Math.max(0, 1 - (cloudCover / 100));
-  const cx = 800;
-  const cy = 100;
-  const r = 40;
+  const cx = 1800;
+  const cy = 60;
+  const r = 35;
 
   const getMoonPath = (phase) => {
     const isLeftShadow = phase < 0.5; 
@@ -51,18 +51,18 @@ const Moon = ({ phase, timeOfDay, cloudCover }) => {
       <circle cx={cx} cy={cy} r={r * 1.5} fill="white" opacity="0.1" />
       <circle cx={cx} cy={cy} r={r} fill="#fdfdff" />
       <path d={getMoonPath(phase)} fill="rgba(20,24,30,0.95)" />
-      <circle cx={cx - 10} cy={cy - 5} r={5} fill="rgba(200,200,200,0.1)" />
+      <circle cx={cx - 8} cy={cy - 4} r={4} fill="rgba(200,200,200,0.1)" />
     </g>
   );
 };
 
 const Clouds = ({ cover, windSpeed, windDir }) => {
-  const cloudCount = 5;
+  const cloudCount = 6;
   const clouds = useMemo(() => Array.from({ length: cloudCount }).map((_, i) => ({
       id: i,
-      x: seededRandom(i) * 1000,
-      y: 50 + seededRandom(i + 100) * 150,
-      scale: 0.5 + seededRandom(i + 200) * 1.5,
+      x: seededRandom(i) * 2200 - 100,
+      y: 30 + seededRandom(i + 100) * 80,
+      scale: 0.6 + seededRandom(i + 200) * 1.2,
       speed: 0.2 + seededRandom(i) * 0.5
     })), []);
 
@@ -85,14 +85,14 @@ const Clouds = ({ cover, windSpeed, windDir }) => {
             fill={cover > 60 ? "#bdc3c7" : "#ecf0f1"} opacity="0.9" />
         </g>
       ))}
-      <style>{` @keyframes float { 0% { transform: translateX(-200px); } 100% { transform: translateX(1200px); } } `}</style>
+      <style>{` @keyframes float { 0% { transform: translateX(-200px); } 100% { transform: translateX(2400px); } } `}</style>
     </g>
   );
 };
 
 const Water = ({ tideLevel, windSpeed, landscapeType }) => {
-  const yPos = 550 - (tideLevel * 2); 
-  const waveHeight = 5 + (windSpeed / 5); 
+  const yPos = 320 - (tideLevel * 0.8); 
+  const waveHeight = 4 + (windSpeed / 5); 
   const waveSpeed = 20 - (windSpeed / 6);
   
   // Different water colors for different landscape types
@@ -108,8 +108,8 @@ const Water = ({ tideLevel, windSpeed, landscapeType }) => {
 
   return (
     <g>
-      <path fill={colors.primary} fillOpacity="0.6" d={`M0,${yPos} Q250,${yPos - waveHeight} 500,${yPos} T1000,${yPos} V600 H0 Z`} style={{ animation: `wave ${waveSpeed}s linear infinite` }} />
-      <path fill={colors.secondary} fillOpacity="0.8" d={`M0,${yPos + 10} Q250,${yPos + 10 + waveHeight} 500,${yPos + 10} T1000,${yPos + 10} V600 H0 Z`} style={{ animation: `wave ${waveSpeed * 0.8}s linear infinite reverse` }} />
+      <path fill={colors.primary} fillOpacity="0.6" d={`M0,${yPos} Q500,${yPos - waveHeight} 1000,${yPos} T2000,${yPos} V400 H0 Z`} style={{ animation: `wave ${waveSpeed}s linear infinite` }} />
+      <path fill={colors.secondary} fillOpacity="0.8" d={`M0,${yPos + 8} Q500,${yPos + 8 + waveHeight} 1000,${yPos + 8} T2000,${yPos + 8} V400 H0 Z`} style={{ animation: `wave ${waveSpeed * 0.8}s linear infinite reverse` }} />
       <style>{` @keyframes wave { 0% { transform: scaleY(1); } 50% { transform: scaleY(1.05); } 100% { transform: scaleY(1); } } `}</style>
     </g>
   );
@@ -119,8 +119,8 @@ const Rain = ({ intensity, windSpeed, windDir }) => {
   if (intensity < 10) return null;
   const dropCount = Math.floor(intensity * 2);
   const angle = (windDir > 180 ? -1 : 1) * (windSpeed / 4);
-  const drops = useMemo(() => Array.from({ length: 100 }).map((_, i) => ({
-    id: i, x: Math.random() * 1000, y: Math.random() * 600, len: 10 + Math.random() * 20, speed: 0.5 + Math.random() * 0.5
+  const drops = useMemo(() => Array.from({ length: 150 }).map((_, i) => ({
+    id: i, x: Math.random() * 2000, y: Math.random() * 400, len: 8 + Math.random() * 15, speed: 0.5 + Math.random() * 0.5
   })), []);
 
   return (
@@ -128,7 +128,7 @@ const Rain = ({ intensity, windSpeed, windDir }) => {
       {drops.slice(0, dropCount).map(drop => (
         <line key={drop.id} x1={drop.x} y1={drop.y} x2={drop.x + angle} y2={drop.y + drop.len} stroke="#aaddff" strokeWidth="1" opacity="0.6" style={{ animation: `fall ${1 / drop.speed}s linear infinite` }} />
       ))}
-      <style>{` @keyframes fall { 0% { transform: translateY(-600px); } 100% { transform: translateY(600px); } } `}</style>
+      <style>{` @keyframes fall { 0% { transform: translateY(-400px); } 100% { transform: translateY(400px); } } `}</style>
     </g>
   );
 };
@@ -140,22 +140,22 @@ const WindIndicator = ({ speed, direction }) => {
   const scaleX = isBlowingRight ? 1 : -1;
 
   return (
-    <g transform="translate(850, 480)"> 
-      <rect x="-2" y="0" width="4" height="120" fill="#5d4037" />
+    <g transform="translate(1850, 300)"> 
+      <rect x="-2" y="0" width="4" height="100" fill="#5d4037" />
       <circle cx="0" cy="0" r="3" fill="#3e2723" />
       <g transform={`scale(${scaleX}, 1) rotate(${rotation})`}>
-         <path d="M0,-10 L0,10 L15,8 L15,-8 Z" fill="#e67e22" />
-         <path d="M15,-8 L15,8 L30,6 L30,-6 Z" fill="#ecf0f1" />
-         <path d="M30,-6 L30,6 L45,5 L45,-5 Z" fill="#e67e22" />
-         <path d="M45,-5 L45,5 L60,4 L60,-4 Z" fill="#ecf0f1" />
-         <path d="M60,-4 L60,4 L90,1 L90,-1 Z" fill="#e67e22" />
+         <path d="M0,-8 L0,8 L12,6 L12,-6 Z" fill="#e67e22" />
+         <path d="M12,-6 L12,6 L24,5 L24,-5 Z" fill="#ecf0f1" />
+         <path d="M24,-5 L24,5 L36,4 L36,-4 Z" fill="#e67e22" />
+         <path d="M36,-4 L36,4 L48,3 L48,-3 Z" fill="#ecf0f1" />
+         <path d="M48,-3 L48,3 L72,1 L72,-1 Z" fill="#e67e22" />
          {speed > 20 && (
-             <path d="M90,-1 L90,1 L100,0 Z" fill="#e67e22" opacity="0.8">
-                <animate attributeName="d" values="M90,-1 L90,1 L100,0 Z; M90,-1 L90,1 L105,5 Z; M90,-1 L90,1 L100,0 Z" dur={`${0.5 - (speed/400)}s`} repeatCount="indefinite" />
+             <path d="M72,-1 L72,1 L80,0 Z" fill="#e67e22" opacity="0.8">
+                <animate attributeName="d" values="M72,-1 L72,1 L80,0 Z; M72,-1 L72,1 L85,4 Z; M72,-1 L72,1 L80,0 Z" dur={`${0.5 - (speed/400)}s`} repeatCount="indefinite" />
              </path>
          )}
       </g>
-      <text x="0" y="140" textAnchor="middle" fill="white" fontSize="12" style={{ textShadow: '1px 1px 2px black' }}>
+      <text x="0" y="115" textAnchor="middle" fill="white" fontSize="11" style={{ textShadow: '1px 1px 2px black' }}>
         {speed} km/h {isBlowingRight ? 'E' : 'W'}
       </text>
     </g>
@@ -182,11 +182,11 @@ const Birds = ({ landscapeType, timeOfDay }) => {
   
   const birds = useMemo(() => {
     const types = getBirdTypes();
-    return Array.from({ length: 3 }).map((_, i) => ({
+    return Array.from({ length: 4 }).map((_, i) => ({
       id: i,
       type: types[i % types.length],
-      x: 200 + i * 250,
-      y: 150 + seededRandom(i) * 100,
+      x: 300 + i * 400,
+      y: 80 + seededRandom(i) * 60,
       speed: 3 + seededRandom(i + 50) * 2,
       delay: seededRandom(i + 100) * 3
     }));
@@ -210,9 +210,9 @@ const Birds = ({ landscapeType, timeOfDay }) => {
       <style>{`
         @keyframes fly {
           0% { transform: translateX(0) translateY(0); }
-          25% { transform: translateX(100px) translateY(-20px); }
+          25% { transform: translateX(100px) translateY(-15px); }
           50% { transform: translateX(200px) translateY(0); }
-          75% { transform: translateX(100px) translateY(20px); }
+          75% { transform: translateX(100px) translateY(15px); }
           100% { transform: translateX(0) translateY(0); }
         }
       `}</style>
@@ -223,21 +223,21 @@ const Birds = ({ landscapeType, timeOfDay }) => {
 // Tackle Box Component
 const TackleBox = ({ onJettyX, onJettyY }) => {
   return (
-    <g transform={`translate(${onJettyX - 100}, ${onJettyY + 15})`}>
+    <g transform={`translate(${onJettyX - 100}, ${onJettyY + 12})`}>
       {/* Tackle box body */}
-      <rect x="0" y="0" width="40" height="25" fill="#4a4a4a" rx="2" />
-      <rect x="0" y="0" width="40" height="12" fill="#666" rx="2" />
+      <rect x="0" y="0" width="35" height="22" fill="#4a4a4a" rx="2" />
+      <rect x="0" y="0" width="35" height="10" fill="#666" rx="2" />
       
       {/* Handle */}
-      <path d="M12,0 Q20,-5 28,0" stroke="#888" strokeWidth="2" fill="none" />
+      <path d="M10,0 Q17.5,-4 25,0" stroke="#888" strokeWidth="2" fill="none" />
       
       {/* Details */}
-      <rect x="5" y="15" width="8" height="8" fill="#e67e22" rx="1" />
-      <rect x="16" y="15" width="8" height="8" fill="#27ae60" rx="1" />
-      <rect x="27" y="15" width="8" height="8" fill="#3498db" rx="1" />
+      <rect x="4" y="13" width="7" height="7" fill="#e67e22" rx="1" />
+      <rect x="14" y="13" width="7" height="7" fill="#27ae60" rx="1" />
+      <rect x="24" y="13" width="7" height="7" fill="#3498db" rx="1" />
       
       {/* Latch */}
-      <circle cx="20" cy="6" r="2" fill="#ffd700" />
+      <circle cx="17.5" cy="5" r="1.5" fill="#ffd700" />
     </g>
   );
 };
@@ -269,9 +269,9 @@ const Fisherman = ({ onJettyX, onJettyY }) => {
   const isSmoking = state === 'smoking';
 
   return (
-    <g transform={`translate(${onJettyX + 15}, ${onJettyY}) scale(3.5)`}>
+    <g transform={`translate(${onJettyX + 15}, ${onJettyY}) scale(3.0)`}>
        {isJerk && (
-          <g transform="translate(-80, 50) scale(1, 0.3)">
+          <g transform="translate(-65, 35) scale(1.2, 0.3)">
              <circle r="10" stroke="white" strokeWidth="0.5" fill="none" opacity="0.8">
                 <animate attributeName="r" values="5;30" dur="1s" repeatCount="indefinite" />
                 <animate attributeName="opacity" values="0.8;0" dur="1s" repeatCount="indefinite" />
@@ -324,9 +324,9 @@ const Fisherman = ({ onJettyX, onJettyY }) => {
                  <path d="M0,0 L-8,5" stroke="#d35400" strokeWidth="5" strokeLinecap="round" />
                  <path d="M-8,5 L-15,2" stroke="#d35400" strokeWidth="5" strokeLinecap="round" />
                  <line x1="-12" y1="2" x2="-18" y2="0" stroke="#3e2723" strokeWidth="2" />
-                 <line x1="-18" y1="0" x2="-80" y2="-20" stroke="#5d4037" strokeWidth="1.5" />
-                 <circle cx="-25" cy="-2" r="1.5" fill="#9e9e9e" />
-                 <path d={isJerk ? "M-80,-20 L-80,50" : "M-80,-20 Q-80,20 -75,40"} stroke="white" strokeWidth="0.3" fill="none" opacity="0.6" />
+                 <line x1="-18" y1="0" x2="-65" y2="-15" stroke="#5d4037" strokeWidth="1.5" />
+                 <circle cx="-22" cy="-2" r="1.5" fill="#9e9e9e" />
+                 <path d={isJerk ? "M-65,-15 L-65,35" : "M-65,-15 Q-65,15 -60,30"} stroke="white" strokeWidth="0.3" fill="none" opacity="0.6" />
              </g>
           </g>
 
@@ -374,11 +374,11 @@ const LandscapeBackground = ({ landscapeType, waterY }) => {
       return (
         <g>
           {/* Distant mountains */}
-          <path d="M0,600 L0,350 L150,200 L350,400 L500,250 L750,420 L1000,280 L1000,600 Z" fill="#8e7cc3" opacity="0.3" />
+          <path d="M0,400 L0,200 L250,120 L500,220 L800,140 L1200,240 L1600,160 L2000,180 L2000,400 Z" fill="#8e7cc3" opacity="0.3" />
           {/* Golden sand */}
-          <path d={`M0,${waterY} L0,600 L1000,600 L1000,${waterY + 40} Q800,${waterY + 50} 600,${waterY + 45} Q400,${waterY + 40} 200,${waterY + 50} Q100,${waterY + 45} 0,${waterY} Z`} fill="#f4d03f" />
+          <path d={`M0,${waterY} L0,400 L2000,400 L2000,${waterY + 35} Q1600,${waterY + 42} 1200,${waterY + 38} Q800,${waterY + 35} 400,${waterY + 42} Q200,${waterY + 38} 0,${waterY} Z`} fill="#f4d03f" />
           {/* Sand detail */}
-          <path d={`M0,${waterY + 30} Q200,${waterY + 40} 400,${waterY + 35} Q600,${waterY + 30} 800,${waterY + 38} L1000,${waterY + 40} L1000,600 L0,600 Z`} fill="#f39c12" opacity="0.3" />
+          <path d={`M0,${waterY + 25} Q400,${waterY + 32} 800,${waterY + 28} Q1200,${waterY + 25} 1600,${waterY + 30} L2000,${waterY + 32} L2000,400 L0,400 Z`} fill="#f39c12" opacity="0.3" />
         </g>
       );
     
@@ -386,13 +386,13 @@ const LandscapeBackground = ({ landscapeType, waterY }) => {
       return (
         <g>
           {/* Distant trees */}
-          <path d="M0,600 L0,320 Q100,280 200,300 Q300,320 400,290 Q500,310 600,300 Q700,285 800,310 Q900,295 1000,320 L1000,600 Z" fill="#27ae60" opacity="0.4" />
+          <path d="M0,400 L0,180 Q200,150 400,170 Q600,180 800,160 Q1000,175 1200,165 Q1400,155 1600,175 Q1800,160 2000,180 L2000,400 Z" fill="#27ae60" opacity="0.4" />
           {/* Riverbank - green grass */}
-          <path d={`M900,${waterY - 20} L1000,${waterY} L1000,600 L900,600 Q920,${waterY + 100} 950,${waterY + 60} Z`} fill="#2ecc71" />
-          <path d={`M850,${waterY + 10} L900,${waterY - 20} Q920,${waterY + 20} 950,${waterY + 60} L1000,600 L850,600 Z`} fill="#27ae60" />
+          <path d={`M1700,${waterY - 15} L2000,${waterY} L2000,400 L1700,400 Q1800,${waterY + 80} 1900,${waterY + 50} Z`} fill="#2ecc71" />
+          <path d={`M1600,${waterY + 8} L1700,${waterY - 15} Q1800,${waterY + 15} 1900,${waterY + 50} L2000,400 L1600,400 Z`} fill="#27ae60" />
           {/* Foreground grass details */}
-          {Array.from({ length: 20 }).map((_, i) => (
-            <line key={i} x1={900 + i * 5} y1={waterY + 20 + Math.random() * 40} x2={900 + i * 5} y2={waterY + 30 + Math.random() * 50} stroke="#229954" strokeWidth="2" opacity="0.6" />
+          {Array.from({ length: 30 }).map((_, i) => (
+            <line key={i} x1={1700 + i * 10} y1={waterY + 15 + Math.random() * 35} x2={1700 + i * 10} y2={waterY + 25 + Math.random() * 45} stroke="#229954" strokeWidth="2" opacity="0.6" />
           ))}
         </g>
       );
@@ -401,14 +401,14 @@ const LandscapeBackground = ({ landscapeType, waterY }) => {
       return (
         <g>
           {/* Muddy terrain */}
-          <path d="M0,600 L0,350 L200,300 L400,380 L600,320 L800,400 L1000,340 L1000,600 Z" fill="#7d6608" opacity="0.4" />
+          <path d="M0,400 L0,200 L400,160 L800,210 L1200,180 L1600,220 L2000,190 L2000,400 Z" fill="#7d6608" opacity="0.4" />
           {/* Marshy banks */}
-          <path d={`M900,${waterY} L1000,${waterY + 20} L1000,600 L900,600 Q920,${waterY + 80} 950,${waterY + 50} Z`} fill="#a98" />
+          <path d={`M1700,${waterY} L2000,${waterY + 15} L2000,400 L1700,400 Q1800,${waterY + 65} 1900,${waterY + 40} Z`} fill="#a98" />
           {/* Marsh grass/reeds */}
-          {Array.from({ length: 15 }).map((_, i) => (
-            <g key={i} transform={`translate(${920 + i * 6}, ${waterY + 30 + Math.random() * 30})`}>
-              <line x1="0" y1="0" x2="0" y2={-40 - Math.random() * 20} stroke="#8b7355" strokeWidth="1.5" />
-              <circle cx="0" cy={-45 - Math.random() * 20} r="2" fill="#d4a574" />
+          {Array.from({ length: 25 }).map((_, i) => (
+            <g key={i} transform={`translate(${1720 + i * 12}, ${waterY + 25 + Math.random() * 25})`}>
+              <line x1="0" y1="0" x2="0" y2={-35 - Math.random() * 15} stroke="#8b7355" strokeWidth="1.5" />
+              <circle cx="0" cy={-40 - Math.random() * 15} r="2" fill="#d4a574" />
             </g>
           ))}
         </g>
@@ -418,20 +418,20 @@ const LandscapeBackground = ({ landscapeType, waterY }) => {
       return (
         <g>
           {/* Distant shore */}
-          <path d="M0,600 L0,380 L300,350 L600,390 L1000,360 L1000,600 Z" fill="#566573" opacity="0.5" />
+          <path d="M0,400 L0,220 L500,190 L1000,230 L1500,200 L2000,210 L2000,400 Z" fill="#566573" opacity="0.5" />
           {/* Rocky breakwater on right */}
           <g>
             {/* Large rocks */}
-            {Array.from({ length: 8 }).map((_, i) => {
-              const x = 900 + (i % 3) * 30 - Math.random() * 15;
-              const y = waterY + 20 + Math.floor(i / 3) * 25;
-              const size = 20 + Math.random() * 15;
+            {Array.from({ length: 12 }).map((_, i) => {
+              const x = 1700 + (i % 4) * 25 - Math.random() * 12;
+              const y = waterY + 15 + Math.floor(i / 4) * 20;
+              const size = 18 + Math.random() * 12;
               return (
                 <ellipse key={i} cx={x} cy={y} rx={size} ry={size * 0.8} fill={i % 2 === 0 ? "#5d6d7e" : "#797d7f"} stroke="#34495e" strokeWidth="1" />
               );
             })}
             {/* Stone texture details */}
-            <path d={`M920,${waterY + 50} L950,${waterY + 40} L980,${waterY + 55} L1000,${waterY + 50} L1000,600 L920,600 Z`} fill="#4d5656" />
+            <path d={`M1730,${waterY + 40} L1800,${waterY + 32} L1870,${waterY + 44} L2000,${waterY + 40} L2000,400 L1730,400 Z`} fill="#4d5656" />
           </g>
         </g>
       );
@@ -440,11 +440,11 @@ const LandscapeBackground = ({ landscapeType, waterY }) => {
       return (
         <g>
           {/* Distant mountains with treeline */}
-          <path d="M0,600 L0,250 L100,200 L200,220 L300,180 L400,210 L500,170 L600,200 L700,160 L800,190 L900,150 L1000,180 L1000,600 Z" fill="#5f6a6a" opacity="0.4" />
-          <path d="M0,280 L100,240 L200,260 L300,230 L400,250 L500,220 L600,240 L700,210 L800,230 L900,200 L1000,220 L1000,600 L0,600 Z" fill="#27ae60" opacity="0.3" />
+          <path d="M0,400 L0,140 L200,110 L400,125 L600,100 L800,120 L1000,95 L1200,115 L1400,90 L1600,108 L1800,85 L2000,100 L2000,400 Z" fill="#5f6a6a" opacity="0.4" />
+          <path d="M0,160 L200,130 L400,145 L600,125 L800,140 L1000,120 L1200,135 L1400,115 L1600,128 L1800,110 L2000,125 L2000,400 L0,400 Z" fill="#27ae60" opacity="0.3" />
           {/* Grassy bank */}
-          <path d={`M900,${waterY - 10} L1000,${waterY + 10} L1000,600 L900,600 Z`} fill="#52be80" />
-          <path d={`M920,${waterY + 10} Q940,${waterY + 30} 960,${waterY + 20} T1000,${waterY + 40} L1000,600 L920,600 Z`} fill="#45b39d" />
+          <path d={`M1700,${waterY - 8} L2000,${waterY + 8} L2000,400 L1700,400 Z`} fill="#52be80" />
+          <path d={`M1750,${waterY + 8} Q1850,${waterY + 25} 1920,${waterY + 15} T2000,${waterY + 32} L2000,400 L1750,400 Z`} fill="#45b39d" />
         </g>
       );
     
@@ -457,11 +457,10 @@ const LandscapeBackground = ({ landscapeType, waterY }) => {
 const Landscape = ({ data, tideStats, landscapeType = 'beach' }) => {
   const { tide, windSpeed, windDir, rain, clouds, moonPhase, time } = data;
   const isStormy = rain > 60 || clouds > 90;
-  const reedBend = (windSpeed / 100) * 30 * ((windDir > 180) ? -1 : 1);
-  const waterY = 550 - (tide * 2); 
+  const waterY = 320 - (tide * 0.8); 
 
   return (
-    <svg viewBox="0 0 1000 600" className="w-full h-full rounded-lg shadow-2xl bg-gray-900 overflow-hidden" preserveAspectRatio="xMidYMid slice">
+    <svg viewBox="0 0 2000 400" className="w-full h-full rounded-lg shadow-2xl bg-gray-900 overflow-hidden" preserveAspectRatio="xMidYMid slice">
       <SkyGradient timeOfDay={time} cloudCover={clouds} isStormy={isStormy} />
       <rect width="100%" height="100%" fill="url(#skyGradient)" />
       <Moon phase={moonPhase} timeOfDay={time} cloudCover={clouds} />
@@ -473,26 +472,26 @@ const Landscape = ({ data, tideStats, landscapeType = 'beach' }) => {
       <Water tideLevel={tide} windSpeed={windSpeed} landscapeType={landscapeType} />
       
       {/* Jetty with improved perspective */}
-      <g transform="translate(0, 10)">
-        <rect x="750" y="450" width="10" height="200" fill="#5d4037" />
-        <rect x="950" y="450" width="10" height="200" fill="#5d4037" />
-        <g transform="translate(850, 450)">
-            <rect x="0" y="0" width="14" height="200" fill="#4e342e" />
-            {[...Array(10)].map((_, i) => <rect key={i} x="2" y={20 + (i * 15)} width="10" height="2" fill="white" opacity="0.5" />)}
-            <g transform={`translate(0, ${Math.max(0, waterY - 450)})`}>
+      <g transform="translate(0, 5)">
+        <rect x="1450" y="280" width="10" height="140" fill="#5d4037" />
+        <rect x="1750" y="280" width="10" height="140" fill="#5d4037" />
+        <g transform="translate(1600, 280)">
+            <rect x="0" y="0" width="12" height="140" fill="#4e342e" />
+            {[...Array(8)].map((_, i) => <rect key={i} x="2" y={15 + (i * 15)} width="8" height="2" fill="white" opacity="0.5" />)}
+            <g transform={`translate(0, ${Math.max(0, waterY - 280)})`}>
                 {tideStats.flow !== 0 && (
                      <>
-                        <path d={tideStats.flow > 0 ? "M-20,5 L-5,5 M20,5 L35,5" : "M-5,5 L-20,5 M35,5 L20,5"} stroke="white" strokeWidth="2" strokeOpacity="0.6"><animate attributeName="strokeDashoffset" from="0" to="10" dur="1s" repeatCount="indefinite" /></path>
-                        <path d={tideStats.flow > 0 ? "M-5,5 L-10,0 M-5,5 L-10,10" : "M-20,5 L-15,0 M-20,5 L-15,10"} stroke="white" strokeWidth="2" strokeOpacity="0.8" fill="none"/>
+                        <path d={tideStats.flow > 0 ? "M-15,5 L-5,5 M15,5 L25,5" : "M-5,5 L-15,5 M25,5 L15,5"} stroke="white" strokeWidth="2" strokeOpacity="0.6"><animate attributeName="strokeDashoffset" from="0" to="10" dur="1s" repeatCount="indefinite" /></path>
+                        <path d={tideStats.flow > 0 ? "M-5,5 L-8,2 M-5,5 L-8,8" : "M-15,5 L-12,2 M-15,5 L-12,8"} stroke="white" strokeWidth="2" strokeOpacity="0.8" fill="none"/>
                      </>
                 )}
             </g>
         </g>
-        <rect x="700" y="460" width="300" height="20" fill="#795548" />
-        <rect x="700" y="450" width="300" height="10" fill="#8d6e63" />
+        <rect x="1400" y="288" width="400" height="18" fill="#795548" />
+        <rect x="1400" y="280" width="400" height="8" fill="#8d6e63" />
         
-        <TackleBox onJettyX={700} onJettyY={460} />
-        <Fisherman onJettyX={700} onJettyY={460} />
+        <TackleBox onJettyX={1400} onJettyY={288} />
+        <Fisherman onJettyX={1400} onJettyY={288} />
       </g>
       
       <WindIndicator speed={windSpeed} direction={windDir} />
@@ -505,8 +504,8 @@ const Landscape = ({ data, tideStats, landscapeType = 'beach' }) => {
       )}
       
       <g>
-          <text x="20" y="40" fill="white" fontFamily="monospace" fontSize="14" style={{ textShadow: '1px 1px 2px black' }}>TIME: {Math.floor(time)}:00 | WIND: {windSpeed}km/h | {landscapeType.toUpperCase()}</text>
-          <text x="20" y="60" fill={tideStats.color} fontFamily="monospace" fontSize="14" fontWeight="bold" style={{ textShadow: '1px 1px 2px black' }}>TIDE: {Math.round(tide)}% ({tideStats.status}) {tideStats.arrow}</text>
+          <text x="20" y="30" fill="white" fontFamily="monospace" fontSize="13" style={{ textShadow: '1px 1px 2px black' }}>TIME: {Math.floor(time)}:00 | WIND: {windSpeed}km/h | {landscapeType.toUpperCase()}</text>
+          <text x="20" y="50" fill={tideStats.color} fontFamily="monospace" fontSize="13" fontWeight="bold" style={{ textShadow: '1px 1px 2px black' }}>TIDE: {Math.round(tide)}% ({tideStats.status}) {tideStats.arrow}</text>
       </g>
     </svg>
   );
