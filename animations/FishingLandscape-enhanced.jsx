@@ -513,5 +513,3 @@ const Landscape = ({ data, tideStats, landscapeType = 'beach' }) => {
 
 // Export for use in main app
 window.Landscape = Landscape;
-
-export default Landscape;
