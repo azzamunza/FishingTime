@@ -55,10 +55,11 @@ for(i in 1:nrow(stations)) {
   for(j in 1:nrow(st_consts)) {
     c_name <- st_consts$code[j]
     # Export the raw nominal amplitude and phase
-    # The JS application uses static amplitudes without nodal corrections
+    # Normalize phase to 0-360 degree range for consistency
+    phase_normalized <- st_consts$phase[j] %% 360
     const_obj[[c_name]] <- list(
       amplitude = st_consts$amplitude[j],
-      phase = st_consts$phase[j]
+      phase = phase_normalized
     )
   }
   
