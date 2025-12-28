@@ -13,6 +13,7 @@ A web-based tool for identifying the best times of day to go fishing at any loca
 - **Client-Side Tide Prediction**: Harmonic tide calculations without external API dependencies
 - **Customizable Datasets**: Enable/disable and adjust acceptable ranges for each environmental factor
 - **Real-Time Weather & Marine Data**: Integration with Open-Meteo APIs for current conditions
+- **Global Tide Stations**: Support for 1,100+ harmonic tide stations worldwide via MarineTides integration
 - **Multiple Australian Stations**: Pre-configured tide stations across Western Australia and beyond
 
 ## How It Works
@@ -80,7 +81,19 @@ This gives us meters per hour, indicating how fast the tide is rising or falling
 
 ## Adding New Tide Stations
 
-To add a new tide station to `stations.json`:
+### Using MarineTides Global Database (Recommended)
+
+The easiest way to add worldwide tide stations is to use the MarineTides integration:
+
+1. **Install R** and the required packages
+2. **Run the extraction script**: `Rscript extract_marine_tides.R`
+3. **Deploy the data**: `cp stations_global.json stations.json`
+
+This provides 1,100+ harmonic tide stations worldwide. See [README_MARINE_TIDES.md](README_MARINE_TIDES.md) for detailed instructions.
+
+### Adding Individual Stations Manually
+
+To manually add a single tide station to `stations.json`:
 
 1. **Obtain Harmonic Constants**: Get amplitude and phase data for at least M2, S2, K1, and O1 constituents
    - Sources: National tide agencies, oceanographic institutions, published tide tables
@@ -209,15 +222,19 @@ This is an open-source project. Please check the repository for license details.
 
 Contributions welcome! Areas for improvement:
 
-- Additional tide stations worldwide
 - Moon phase integration
 - Species-specific scoring profiles
 - Historical catch data overlay
 - Weather forecast accuracy indicators
 - Mobile app version
+- Subordinate station support (offset-based calculations)
+- Nodal correction factors for improved accuracy
+
+**Note**: The MarineTides integration provides 1,100+ harmonic stations worldwide. See [README_MARINE_TIDES.md](README_MARINE_TIDES.md) for details.
 
 ## Acknowledgments
 
 - **Open-Meteo**: For providing free weather and marine APIs
-- **Tide Station Data**: Derived from publicly available harmonic constant tables
+- **MarineTides**: R package providing global harmonic tide station data (https://github.com/arestrom/MarineTides)
+- **Tide Station Data**: Derived from NOAA and international hydrographic sources
 - **beachtime.html**: Original beach conditions visualization that inspired this project

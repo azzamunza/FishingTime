@@ -206,3 +206,12 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 test-demo.html
+
+# R temporary files
+.Rhistory
+.RData
+.Rproj.user
+
+# Generated station data (keep in repo for deployment, but can be regenerated)
+# Uncomment the next line if you want to exclude the generated global stations file
+# stations_global.json
