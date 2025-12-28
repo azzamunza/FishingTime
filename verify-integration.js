@@ -21,7 +21,7 @@ const sampleStations = [
             K2: { amplitude: 0.05, phase: 142.8 },
             Q1: { amplitude: 0.02, phase: 281.5 },
             M4: { amplitude: 0.04, phase: 246.8 },
-            M6: { amplitude: 0.01, phase: 370.2 }
+            M6: { amplitude: 0.01, phase: 10.2 }  // Normalized from 370.2
         }
     },
     {
@@ -38,7 +38,7 @@ const sampleStations = [
             O1: { amplitude: 0.28, phase: 132.4 },
             P1: { amplitude: 0.12, phase: 155.9 },
             K2: { amplitude: 0.04, phase: 208.1 },
-            M4: { amplitude: 0.02, phase: 378.4 }
+            M4: { amplitude: 0.02, phase: 18.4 }  // Normalized from 378.4
         }
     },
     {
@@ -55,7 +55,8 @@ const sampleStations = [
             O1: { amplitude: 0.07, phase: 346.2 },
             P1: { amplitude: 0.03, phase: 9.7 },
             K2: { amplitude: 0.18, phase: 76.1 },
-            M4: { amplitude: 0.15, phase: 113.4 }
+            M4: { amplitude: 0.15, phase: 113.4 },
+            M6: { amplitude: 0.05, phase: 125.0 }  // Normalized from 485.0
         }
     }
 ];

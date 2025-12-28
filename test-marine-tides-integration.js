@@ -24,7 +24,7 @@ const sampleGlobalStation = {
         K2: { amplitude: 0.05, phase: 142.8 },
         Q1: { amplitude: 0.02, phase: 281.5 },
         M4: { amplitude: 0.04, phase: 246.8 },
-        M6: { amplitude: 0.01, phase: 370.2 },
+        M6: { amplitude: 0.01, phase: 10.2 },  // Normalized from 370.2
         MF: { amplitude: 0.02, phase: 12.5 },
         MM: { amplitude: 0.01, phase: 45.3 },
         

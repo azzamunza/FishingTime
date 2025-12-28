@@ -40,9 +40,9 @@ const TIDAL_SPEEDS = {
     MF: 1.0980331,   // Lunisolar fortnightly
     
     // Additional constituents
-    NU2: 28.5125831, // Larger lunar evectional
-    LAM2: 29.4556253,// Smaller lunar evectional
-    MU2: 27.9682084, // Variational
+    NU2: 28.5125831,  // Larger lunar evectional
+    LAM2: 29.4556253, // Smaller lunar evectional
+    MU2: 27.9682084,  // Variational
     "2N2": 27.8953548, // Lunar elliptical semidiurnal second-order
     "2SM2": 31.0158958 // Shallow water semidiurnal
 };
