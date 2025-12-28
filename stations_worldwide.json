@@ -1,0 +1,545 @@
+[
+  {
+    "id": "fremantle",
+    "name": "Fremantle Harbour",
+    "latitude": -32.055,
+    "longitude": 115.745,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.25,
+        "phase": 123.4
+      },
+      "S2": {
+        "amplitude": 0.08,
+        "phase": 110.1
+      },
+      "K1": {
+        "amplitude": 0.14,
+        "phase": 45.2
+      },
+      "O1": {
+        "amplitude": 0.11,
+        "phase": 210.9
+      },
+      "N2": {
+        "amplitude": 0.05,
+        "phase": 105.3
+      },
+      "P1": {
+        "amplitude": 0.05,
+        "phase": 43.7
+      }
+    }
+  },
+  {
+    "id": "hillarys",
+    "name": "Hillarys Boat Harbour",
+    "latitude": -31.824,
+    "longitude": 115.74,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.24,
+        "phase": 122.8
+      },
+      "S2": {
+        "amplitude": 0.08,
+        "phase": 109.5
+      },
+      "K1": {
+        "amplitude": 0.14,
+        "phase": 44.8
+      },
+      "O1": {
+        "amplitude": 0.11,
+        "phase": 210.3
+      },
+      "N2": {
+        "amplitude": 0.05,
+        "phase": 104.9
+      },
+      "P1": {
+        "amplitude": 0.05,
+        "phase": 43.2
+      }
+    }
+  },
+  {
+    "id": "perth",
+    "name": "Perth (Swan River)",
+    "latitude": -31.968,
+    "longitude": 115.767,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.22,
+        "phase": 125
+      },
+      "S2": {
+        "amplitude": 0.07,
+        "phase": 112
+      },
+      "K1": {
+        "amplitude": 0.13,
+        "phase": 46
+      },
+      "O1": {
+        "amplitude": 0.1,
+        "phase": 212
+      },
+      "N2": {
+        "amplitude": 0.04,
+        "phase": 106.5
+      },
+      "P1": {
+        "amplitude": 0.04,
+        "phase": 44.5
+      }
+    }
+  },
+  {
+    "id": "bunbury",
+    "name": "Bunbury",
+    "latitude": -33.327,
+    "longitude": 115.644,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.26,
+        "phase": 126.2
+      },
+      "S2": {
+        "amplitude": 0.09,
+        "phase": 113.8
+      },
+      "K1": {
+        "amplitude": 0.15,
+        "phase": 47.5
+      },
+      "O1": {
+        "amplitude": 0.12,
+        "phase": 213.5
+      },
+      "N2": {
+        "amplitude": 0.05,
+        "phase": 108
+      },
+      "P1": {
+        "amplitude": 0.05,
+        "phase": 46
+      }
+    }
+  },
+  {
+    "id": "geraldton",
+    "name": "Geraldton",
+    "latitude": -28.776,
+    "longitude": 114.608,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.28,
+        "phase": 118.5
+      },
+      "S2": {
+        "amplitude": 0.1,
+        "phase": 105.2
+      },
+      "K1": {
+        "amplitude": 0.16,
+        "phase": 41.8
+      },
+      "O1": {
+        "amplitude": 0.13,
+        "phase": 207.5
+      },
+      "N2": {
+        "amplitude": 0.06,
+        "phase": 101.2
+      },
+      "P1": {
+        "amplitude": 0.05,
+        "phase": 40.5
+      }
+    }
+  },
+  {
+    "id": "esperance",
+    "name": "Esperance",
+    "latitude": -33.864,
+    "longitude": 121.891,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.3,
+        "phase": 135
+      },
+      "S2": {
+        "amplitude": 0.1,
+        "phase": 122.5
+      },
+      "K1": {
+        "amplitude": 0.12,
+        "phase": 52
+      },
+      "O1": {
+        "amplitude": 0.1,
+        "phase": 218
+      },
+      "N2": {
+        "amplitude": 0.06,
+        "phase": 115.5
+      },
+      "P1": {
+        "amplitude": 0.04,
+        "phase": 50.5
+      }
+    }
+  },
+  {
+    "id": "albany",
+    "name": "Albany",
+    "latitude": -35.024,
+    "longitude": 117.884,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.32,
+        "phase": 130.5
+      },
+      "S2": {
+        "amplitude": 0.11,
+        "phase": 118
+      },
+      "K1": {
+        "amplitude": 0.13,
+        "phase": 49.5
+      },
+      "O1": {
+        "amplitude": 0.11,
+        "phase": 215.5
+      },
+      "N2": {
+        "amplitude": 0.06,
+        "phase": 112
+      },
+      "P1": {
+        "amplitude": 0.04,
+        "phase": 48
+      }
+    }
+  },
+  {
+    "id": "broome",
+    "name": "Broome",
+    "latitude": -17.963,
+    "longitude": 122.233,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 3.2,
+        "phase": 95
+      },
+      "S2": {
+        "amplitude": 1.1,
+        "phase": 85
+      },
+      "K1": {
+        "amplitude": 0.85,
+        "phase": 28
+      },
+      "O1": {
+        "amplitude": 0.65,
+        "phase": 195
+      },
+      "N2": {
+        "amplitude": 0.65,
+        "phase": 78
+      },
+      "P1": {
+        "amplitude": 0.28,
+        "phase": 26.5
+      }
+    }
+  },
+  {
+    "id": "port_hedland",
+    "name": "Port Hedland",
+    "latitude": -20.313,
+    "longitude": 118.574,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 2.8,
+        "phase": 102
+      },
+      "S2": {
+        "amplitude": 0.95,
+        "phase": 92
+      },
+      "K1": {
+        "amplitude": 0.75,
+        "phase": 32.5
+      },
+      "O1": {
+        "amplitude": 0.58,
+        "phase": 198.5
+      },
+      "N2": {
+        "amplitude": 0.55,
+        "phase": 85
+      },
+      "P1": {
+        "amplitude": 0.25,
+        "phase": 31
+      }
+    }
+  },
+  {
+    "id": "exmouth",
+    "name": "Exmouth",
+    "latitude": -21.939,
+    "longitude": 114.125,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.95,
+        "phase": 108
+      },
+      "S2": {
+        "amplitude": 0.32,
+        "phase": 98
+      },
+      "K1": {
+        "amplitude": 0.42,
+        "phase": 36.5
+      },
+      "O1": {
+        "amplitude": 0.32,
+        "phase": 202
+      },
+      "N2": {
+        "amplitude": 0.19,
+        "phase": 92
+      },
+      "P1": {
+        "amplitude": 0.14,
+        "phase": 35
+      }
+    }
+  },
+  {
+    "id": "8518750",
+    "name": "The Battery, New York Harbor",
+    "latitude": 40.7006,
+    "longitude": -74.0142,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.62,
+        "phase": 123.4
+      },
+      "S2": {
+        "amplitude": 0.18,
+        "phase": 145.2
+      },
+      "N2": {
+        "amplitude": 0.13,
+        "phase": 109.8
+      },
+      "K1": {
+        "amplitude": 0.08,
+        "phase": 315.6
+      },
+      "O1": {
+        "amplitude": 0.06,
+        "phase": 289.3
+      },
+      "P1": {
+        "amplitude": 0.03,
+        "phase": 312.1
+      },
+      "K2": {
+        "amplitude": 0.05,
+        "phase": 142.8
+      },
+      "Q1": {
+        "amplitude": 0.02,
+        "phase": 281.5
+      },
+      "M4": {
+        "amplitude": 0.04,
+        "phase": 246.8
+      },
+      "M6": {
+        "amplitude": 0.01,
+        "phase": 10.2
+      }
+    }
+  },
+  {
+    "id": "9414290",
+    "name": "San Francisco, Golden Gate",
+    "latitude": 37.8065,
+    "longitude": -122.4659,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.58,
+        "phase": 189.2
+      },
+      "S2": {
+        "amplitude": 0.16,
+        "phase": 211.5
+      },
+      "N2": {
+        "amplitude": 0.12,
+        "phase": 175.3
+      },
+      "K1": {
+        "amplitude": 0.36,
+        "phase": 158.7
+      },
+      "O1": {
+        "amplitude": 0.28,
+        "phase": 132.4
+      },
+      "P1": {
+        "amplitude": 0.12,
+        "phase": 155.9
+      },
+      "K2": {
+        "amplitude": 0.04,
+        "phase": 208.1
+      },
+      "M4": {
+        "amplitude": 0.02,
+        "phase": 18.4
+      }
+    }
+  },
+  {
+    "id": "9447130",
+    "name": "Seattle, Puget Sound",
+    "latitude": 47.6038,
+    "longitude": -122.3393,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 1.23,
+        "phase": 242.5
+      },
+      "S2": {
+        "amplitude": 0.28,
+        "phase": 264.8
+      },
+      "N2": {
+        "amplitude": 0.25,
+        "phase": 228.7
+      },
+      "K1": {
+        "amplitude": 0.67,
+        "phase": 198.3
+      },
+      "O1": {
+        "amplitude": 0.51,
+        "phase": 172.6
+      },
+      "P1": {
+        "amplitude": 0.22,
+        "phase": 195.4
+      },
+      "K2": {
+        "amplitude": 0.08,
+        "phase": 261.2
+      },
+      "M4": {
+        "amplitude": 0.03,
+        "phase": 125
+      }
+    }
+  },
+  {
+    "id": "TYO",
+    "name": "Tokyo, Japan",
+    "latitude": 35.6536,
+    "longitude": 139.8577,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 0.55,
+        "phase": 278.9
+      },
+      "S2": {
+        "amplitude": 0.22,
+        "phase": 301.2
+      },
+      "N2": {
+        "amplitude": 0.11,
+        "phase": 264.5
+      },
+      "K1": {
+        "amplitude": 0.14,
+        "phase": 243.1
+      },
+      "O1": {
+        "amplitude": 0.1,
+        "phase": 217.8
+      },
+      "P1": {
+        "amplitude": 0.05,
+        "phase": 240.3
+      },
+      "K2": {
+        "amplitude": 0.06,
+        "phase": 298.5
+      }
+    }
+  },
+  {
+    "id": "LON",
+    "name": "London Bridge, River Thames",
+    "latitude": 51.5074,
+    "longitude": -0.0762,
+    "datum": 0,
+    "constituents": {
+      "M2": {
+        "amplitude": 2.18,
+        "phase": 56.7
+      },
+      "S2": {
+        "amplitude": 0.68,
+        "phase": 79.3
+      },
+      "N2": {
+        "amplitude": 0.43,
+        "phase": 42.8
+      },
+      "K1": {
+        "amplitude": 0.09,
+        "phase": 12.5
+      },
+      "O1": {
+        "amplitude": 0.07,
+        "phase": 346.2
+      },
+      "P1": {
+        "amplitude": 0.03,
+        "phase": 9.7
+      },
+      "K2": {
+        "amplitude": 0.18,
+        "phase": 76.1
+      },
+      "M4": {
+        "amplitude": 0.15,
+        "phase": 113.4
+      },
+      "M6": {
+        "amplitude": 0.05,
+        "phase": 125
+      }
+    }
+  }
+]

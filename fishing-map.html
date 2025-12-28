@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perth Fishing Spots Map</title>
+    <title>Worldwide Fishing Spots & Tide Stations Map</title>
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -316,7 +316,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎣 Perth Fishing Spots Map & Marine Species Guide</h1>
+        <h1>🎣 Worldwide Fishing Spots & Tide Stations Map</h1>
         
         <div class="main-content">
             <div class="map-section">
@@ -385,7 +385,7 @@
             // Load tide stations on mount
             useEffect(() => {
                 if (window.TideModule) {
-                    window.TideModule.loadStations('./stations.json').catch(console.error);
+                    window.TideModule.loadStations('./stations_worldwide.json').catch(console.error);
                 }
             }, []);
             
@@ -493,7 +493,7 @@
                         </div>
                     )}
                     
-                    <h2>{selectedLocation ? 'Species at this Location' : 'All Perth Marine Species'}</h2>
+                    <h2>{selectedLocation ? 'Species at this Location' : 'Marine Species Guide'}</h2>
                     
                     {species.length === 0 && (
                         <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
@@ -609,8 +609,8 @@
             );
         }
         
-        // Initialize map
-        const map = L.map('map').setView([-31.9505, 115.8605], 10);
+        // Initialize map with worldwide view
+        const map = L.map('map').setView([20, 0], 2);
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -623,6 +623,19 @@
                 <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
                     <path d="M15 0 L30 45 L15 40 L0 45 Z" fill="#667eea" stroke="#ffffff" stroke-width="2"/>
                     <text x="15" y="25" font-size="18" text-anchor="middle" fill="white">��</text>
+                </svg>
+            `),
+            iconSize: [30, 45],
+            iconAnchor: [15, 45],
+            popupAnchor: [0, -45]
+        });
+        
+        // Tide station marker icon
+        const tideStationIcon = L.icon({
+            iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="30" height="45" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 0 L30 45 L15 40 L0 45 Z" fill="#4fc3f7" stroke="#ffffff" stroke-width="2"/>
+                    <circle cx="15" cy="22" r="8" fill="white"/>
                 </svg>
             `),
             iconSize: [30, 45],
@@ -662,10 +675,50 @@
             });
         });
         
+        // Load and display worldwide tide stations
+        async function loadTideStations() {
+            try {
+                const response = await fetch('./stations_worldwide.json');
+                const tideStations = await response.json();
+                
+                tideStations.forEach(station => {
+                    const marker = L.marker([station.latitude, station.longitude], { icon: tideStationIcon })
+                        .addTo(map);
+                    
+                    marker.on('click', () => {
+                        if (setSelectedLocationFromMap) {
+                            // Create a location object compatible with the fishing spot format
+                            const location = {
+                                name: station.name,
+                                lat: station.latitude,
+                                lng: station.longitude,
+                                region: 'Worldwide',
+                                locationType: 'beach', // default type for tide stations
+                                stationId: station.id
+                            };
+                            setSelectedLocationFromMap(location);
+                        }
+                    });
+                    
+                    marker.bindTooltip(`${station.name}<br><small>Tide Station</small>`, {
+                        permanent: false,
+                        direction: 'top'
+                    });
+                });
+                
+                console.log(`Loaded ${tideStations.length} tide stations on the map`);
+            } catch (error) {
+                console.error('Error loading tide stations:', error);
+            }
+        }
+        
         L.control.scale({ imperial: false, metric: true }).addTo(map);
         
         // Initial render
         renderApp();
+        
+        // Load tide stations after a short delay to ensure TideModule is ready
+        setTimeout(loadTideStations, 100);
     </script>
 </body>
 </html>
