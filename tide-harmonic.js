@@ -5,13 +5,46 @@
  */
 
 // Tidal constituent speeds in degrees per hour
+// Expanded to support common NOAA and MarineTides constituents
 const TIDAL_SPEEDS = {
+    // Semidiurnal constituents (12-hour periods)
     M2: 28.9841042,  // Principal lunar semidiurnal
     S2: 30.0,        // Principal solar semidiurnal
     N2: 28.4397295,  // Larger lunar elliptic semidiurnal
+    K2: 30.0821373,  // Lunisolar semidiurnal
+    L2: 29.5284789,  // Smaller lunar elliptic semidiurnal
+    T2: 29.9589333,  // Larger solar elliptic semidiurnal
+    
+    // Diurnal constituents (24-hour periods)
     K1: 15.0410686,  // Lunar diurnal
     O1: 13.9430356,  // Lunar diurnal
-    P1: 14.9589314   // Solar diurnal
+    P1: 14.9589314,  // Solar diurnal
+    Q1: 13.3986609,  // Larger lunar elliptic diurnal
+    J1: 15.5854433,  // Smaller lunar elliptic diurnal
+    OO1: 16.1391017, // Lunar diurnal
+    
+    // Shallow water constituents
+    M4: 57.9682084,  // Lunar quarter-diurnal (M2 overtide)
+    M6: 86.9523127,  // Lunar sixth-diurnal (M2 overtide)
+    M8: 115.9364169, // Lunar eighth-diurnal (M2 overtide)
+    MK3: 44.0251729, // Shallow water terdiurnal
+    S4: 60.0,        // Solar quarter-diurnal
+    MN4: 57.4238337, // Shallow water quarter-diurnal
+    MS4: 58.9841042, // Shallow water quarter-diurnal
+    
+    // Long-period constituents
+    MM: 0.5443747,   // Lunar monthly
+    SSA: 0.0821373,  // Solar semiannual
+    SA: 0.0410686,   // Solar annual
+    MSF: 1.0158958,  // Lunisolar synodic fortnightly
+    MF: 1.0980331,   // Lunisolar fortnightly
+    
+    // Additional constituents
+    NU2: 28.5125831, // Larger lunar evectional
+    LAM2: 29.4556253,// Smaller lunar evectional
+    MU2: 27.9682084, // Variational
+    "2N2": 27.8953548, // Lunar elliptical semidiurnal second-order
+    "2SM2": 31.0158958 // Shallow water semidiurnal
 };
 
 // Store loaded stations globally
